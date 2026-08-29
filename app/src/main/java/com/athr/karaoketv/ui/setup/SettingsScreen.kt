@@ -16,12 +16,15 @@ import androidx.tv.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.ui.ScanState
 import com.athr.karaoketv.ui.UpdateState
 import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.TvButton
-import com.athr.karaoketv.ui.components.TvFocusable
+import androidx.tv.material3.ListItem
+import androidx.tv.material3.Switch
+import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 import com.athr.karaoketv.util.formatCount
@@ -104,6 +107,7 @@ fun SettingsScreen(
                 description = "Khi hết bài, tự chuyển sang bài đầu hàng chờ",
                 value = if (autoNext) "Bật" else "Tắt",
                 highlighted = autoNext,
+                checked = autoNext,
                 onClick = onToggleAutoNext,
             )
         }
@@ -113,6 +117,7 @@ fun SettingsScreen(
                 description = "Hiện tên bài kế 25 giây trước khi hết bài",
                 value = if (nextUpBanner) "Bật" else "Tắt",
                 highlighted = nextUpBanner,
+                checked = nextUpBanner,
                 onClick = onToggleNextUpBanner,
             )
         }
@@ -124,6 +129,7 @@ fun SettingsScreen(
                         "Bài mở bằng app YouTube — đăng nhập Premium ở đó thì không quảng cáo.",
                     value = if (appendKaraokeToYouTube) "Bật" else "Tắt",
                     highlighted = appendKaraokeToYouTube,
+                    checked = appendKaraokeToYouTube,
                     onClick = onToggleYouTubeKeyword,
                 )
             }
@@ -206,37 +212,37 @@ private fun SettingRow(
     highlighted: Boolean,
     onClick: () -> Unit,
     danger: Boolean = false,
+    /** Non-null renders the design system's Switch instead of a text badge. */
+    checked: Boolean? = null,
 ) {
-    TvFocusable(
+    ListItem(
+        selected = false,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 18.dp),
-    ) { _ ->
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (danger) KaraokeColors.Danger else KaraokeColors.OnSurface,
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = KaraokeColors.Muted,
+        colors = karaokeListItemColors(),
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (danger) KaraokeColors.Danger else Color.Unspecified,
+            )
+        },
+        supportingContent = {
+            Text(text = description, style = MaterialTheme.typography.bodyMedium)
+        },
+        trailingContent = {
+            if (checked != null) {
+                Switch(checked = checked, onCheckedChange = { onClick() })
+            } else {
+                Pill(
+                    text = value,
+                    color = when {
+                        danger -> KaraokeColors.Danger
+                        highlighted -> KaraokeColors.Success
+                        else -> KaraokeColors.Accent
+                    },
                 )
             }
-            Spacer(Modifier.width(16.dp))
-            Pill(
-                text = value,
-                color = when {
-                    danger -> KaraokeColors.Danger
-                    highlighted -> KaraokeColors.Success
-                    else -> KaraokeColors.Accent
-                },
-            )
-        }
-    }
+        },
+    )
 }

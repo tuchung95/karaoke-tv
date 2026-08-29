@@ -25,9 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.prefs.HomeShelf
-import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.TvButton
-import com.athr.karaoketv.ui.components.TvFocusable
+import androidx.tv.material3.ListItem
+import androidx.tv.material3.Switch
+import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 
@@ -85,34 +86,28 @@ fun HomeLayoutScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    TvFocusable(
+                    ListItem(
+                        selected = false,
                         onClick = { onToggle(shelf) },
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                    ) { focused ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        colors = karaokeListItemColors(),
+                        leadingContent = {
                             Text(
                                 text = "${index + 1}",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = if (focused) KaraokeColors.Accent else KaraokeColors.Muted,
                                 modifier = Modifier.width(48.dp),
                             )
+                        },
+                        headlineContent = {
                             Text(
                                 text = shelf.label,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = if (visible) {
-                                    KaraokeColors.OnSurface
-                                } else {
-                                    KaraokeColors.Muted
-                                },
-                                modifier = Modifier.weight(1f),
                             )
-                            Pill(
-                                text = if (visible) "Hiện" else "Ẩn",
-                                color = if (visible) KaraokeColors.Success else KaraokeColors.Muted,
-                            )
-                        }
-                    }
+                        },
+                        trailingContent = {
+                            Switch(checked = visible, onCheckedChange = { onToggle(shelf) })
+                        },
+                    )
                     TvButton(
                         text = if (visible) "Ẩn" else "Hiện",
                         onClick = { onToggle(shelf) },

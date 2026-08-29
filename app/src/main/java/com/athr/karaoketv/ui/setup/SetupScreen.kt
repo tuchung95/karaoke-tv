@@ -42,7 +42,8 @@ import com.athr.karaoketv.data.library.StorageVolumes
 import com.athr.karaoketv.ui.ScanState
 import com.athr.karaoketv.ui.components.RequestInitialFocus
 import com.athr.karaoketv.ui.components.TvButton
-import com.athr.karaoketv.ui.components.TvFocusable
+import androidx.tv.material3.ListItem
+import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 import com.athr.karaoketv.util.formatCount
@@ -229,31 +230,27 @@ fun SetupScreen(
                 contentPadding = PaddingValues(bottom = 48.dp),
             ) {
                 items(volumes, key = { it.path }) { volume ->
-                    TvFocusable(
+                    ListItem(
+                        selected = false,
                         onClick = { chooseVolume(volume) },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { _ ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Filled.Usb,
-                                contentDescription = null,
-                                tint = KaraokeColors.Accent,
+                        colors = karaokeListItemColors(),
+                        leadingContent = {
+                            Icon(Icons.Filled.Usb, contentDescription = null)
+                        },
+                        headlineContent = {
+                            Text(
+                                text = volume.label,
+                                style = MaterialTheme.typography.titleMedium,
                             )
-                            Spacer(Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = volume.label,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = KaraokeColors.OnSurface,
-                                )
-                                Text(
-                                    text = volume.path,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = KaraokeColors.Muted,
-                                )
-                            }
-                        }
-                    }
+                        },
+                        supportingContent = {
+                            Text(
+                                text = volume.path,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        },
+                    )
                 }
             }
         }

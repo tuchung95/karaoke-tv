@@ -133,10 +133,21 @@ cũ**, nếu không sẽ không cài đè được.
 ## Bố cục và giao diện
 
 Dựng trên **Compose for TV Material** (`androidx.tv:tv-material`) — design system
-chính chủ của Google cho TV — chứ không phải Material3 của điện thoại. Nghĩa là
-hiệu ứng focus (phóng to, viền, quầng sáng) và thang chữ 10-foot lấy thẳng từ thư
-viện, không phải số tôi tự đặt; app focus trông giống mọi app Android TV khác.
-Chỉ bảng màu là riêng.
+chính chủ của Google cho TV — chứ không phải Material3 của điện thoại, và dùng
+thẳng component của nó thay vì tự chế:
+
+| Chỗ dùng | Component |
+|---|---|
+| Nút bấm | `Button` |
+| Thẻ bài hát, thẻ ca sĩ / thể loại | `Card` |
+| Dòng kết quả, hàng chờ, cài đặt, ổ đĩa | `ListItem` |
+| Bật/tắt trong Cài đặt | `Switch` |
+| Phím bàn phím ảo | `Button` |
+| Màu, thang chữ | `MaterialTheme`, `darkColorScheme` |
+
+Nghĩa là hiệu ứng focus (phóng to, đảo màu, viền, quầng sáng) và thang chữ 10-foot
+lấy thẳng từ thư viện, không phải số tôi tự đặt; app focus trông giống mọi app
+Android TV khác. Chỉ bảng màu là riêng.
 
 Theo [hướng dẫn thiết kế Android TV](https://developer.android.com/design/ui/tv):
 khung 960×540dp, lề an toàn 58dp hai bên và 28dp trên dưới, lưới 12 cột với gutter

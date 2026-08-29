@@ -28,7 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.player.QueueItem
 import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.TvButton
-import com.athr.karaoketv.ui.components.TvFocusable
+import androidx.tv.material3.ListItem
+import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 
@@ -134,37 +135,36 @@ private fun QueueRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        TvFocusable(
+        ListItem(
+            selected = false,
             onClick = onPlayNow,
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
-        ) { focused ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            colors = karaokeListItemColors(),
+            leadingContent = {
                 Text(
                     text = ordinal.toString(),
                     style = MaterialTheme.typography.titleLarge,
-                    color = if (focused) KaraokeColors.Accent else KaraokeColors.Muted,
                     modifier = Modifier.width(56.dp),
                 )
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = item.song.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = KaraokeColors.OnSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = listOfNotNull(item.song.artist, item.song.tone)
-                            .joinToString(" · ")
-                            .ifBlank { "—" },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = KaraokeColors.Muted,
-                        maxLines = 1,
-                    )
-                }
-            }
-        }
+            },
+            headlineContent = {
+                Text(
+                    text = item.song.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = listOfNotNull(item.song.artist, item.song.tone)
+                        .joinToString(" · ")
+                        .ifBlank { "—" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                )
+            },
+        )
         TvButton("Hát ngay", onPlayNow, icon = Icons.Filled.PlayArrow)
         TvButton("Ưu tiên", onPrioritise, icon = Icons.Filled.VerticalAlignTop)
         if (canMoveUp) TvButton("Lên", onMoveUp, icon = Icons.Filled.ArrowUpward)
