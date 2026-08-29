@@ -80,7 +80,13 @@ fun SettingsScreen(
             Column(
                 Modifier
                     .fillMaxHeight()
-                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
+                    // The rail is interactive, so it keeps the safe margin like
+                    // everything else: at 12dp a TV bezel can clip it.
+                    .padding(
+                        start = TvSpacing.ScreenHorizontal,
+                        top = 12.dp,
+                        bottom = 12.dp,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 SettingsSection.entries.forEach { entry ->
