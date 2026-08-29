@@ -27,6 +27,17 @@ object FilenameParser {
     private val SEPARATORS = Regex("""\s+[-–—_|]\s+""")
     private val MULTI_SPACE = Regex("""\s{2,}""")
 
+    /**
+     * "x", "ft." and friends only ever join performers, never words of a song
+     * title, so the segment carrying one is the artist — which is what tells
+     * "PHƯƠNG MỸ CHI x DTAP _ THỬ LÒNG QUÂN TỬ" apart from the karaoke-rip
+     * convention where the title comes first.
+     */
+    private val COLLAB = Regex(
+        """(^|\s)(x|ft\.?|feat\.?|featuring|vs\.?)(\s|$)""",
+        RegexOption.IGNORE_CASE,
+    )
+
     /** Dropped wherever they appear; every one of these is rip boilerplate, not a title. */
     private val NOISE_WORDS = setOf(
         "karaoke", "beat", "beat chuan", "nhac song", "nhac song beat",
@@ -84,8 +95,11 @@ object FilenameParser {
         val second = segments.getOrNull(1)?.takeIf { it.length in 2..60 }
 
         val folderKey = parentFolder?.let { TextNormalizer.key(it) }?.takeIf { it.isNotBlank() }
-        val artistLeads = folderKey != null && first != null && second != null &&
+        val filedUnderArtist = folderKey != null && first != null && second != null &&
             TextNormalizer.key(first) == folderKey
+        val firstNamesPerformers = first != null && second != null &&
+            COLLAB.containsMatchIn(first) && !COLLAB.containsMatchIn(second)
+        val artistLeads = filedUnderArtist || firstNamesPerformers
 
         val title = (if (artistLeads) second else first) ?: fallbackTitle
         val artist = if (artistLeads) first else second

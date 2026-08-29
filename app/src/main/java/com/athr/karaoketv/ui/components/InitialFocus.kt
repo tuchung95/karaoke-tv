@@ -32,5 +32,8 @@ fun RequestInitialFocus(focusRequester: FocusRequester, key: Any? = Unit) {
     }
 }
 
-private const val ATTEMPTS = 4
-private const val RETRY_DELAY_MS = 120L
+private const val ATTEMPTS = 6
+// Half a second total: long enough to win the race against Compose's own
+// initial assignment on a slow cold start, short enough that it cannot yank
+// focus back out from under someone already pressing keys.
+private const val RETRY_DELAY_MS = 100L

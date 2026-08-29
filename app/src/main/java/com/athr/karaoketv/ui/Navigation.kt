@@ -16,5 +16,6 @@ sealed interface Screen {
     data object Artists : Screen
     data object Queue : Screen
     data object Settings : Screen
+    data object HomeLayout : Screen
     data class SongList(val title: String, val source: SongListSource) : Screen
 }

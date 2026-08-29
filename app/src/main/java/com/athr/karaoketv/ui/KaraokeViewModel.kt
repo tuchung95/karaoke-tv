@@ -9,6 +9,7 @@ import com.athr.karaoketv.KaraokeApp
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.data.library.LibrarySource
 import com.athr.karaoketv.data.library.ScanProgress
+import com.athr.karaoketv.data.prefs.HomeShelf
 import com.athr.karaoketv.data.update.ApkInstaller
 import com.athr.karaoketv.data.update.UpdateChecker
 import com.athr.karaoketv.data.youtube.YouTubeLauncher
@@ -81,6 +82,35 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
     val updateState: kotlinx.coroutines.flow.StateFlow<UpdateState> = _updateState.asStateFlow()
 
     val currentVersion: String = BuildConfig.VERSION_NAME
+
+    data class HomeLayout(
+        val order: List<HomeShelf>,
+        val hidden: Set<HomeShelf>,
+    )
+
+    private val _homeLayout = MutableStateFlow(
+        HomeLayout(prefs.homeShelfOrder, prefs.hiddenShelves)
+    )
+    val homeLayout: kotlinx.coroutines.flow.StateFlow<HomeLayout> = _homeLayout.asStateFlow()
+
+    private fun refreshHomeLayout() {
+        _homeLayout.value = HomeLayout(prefs.homeShelfOrder, prefs.hiddenShelves)
+    }
+
+    fun toggleShelf(shelf: HomeShelf) {
+        prefs.setShelfVisible(shelf, shelf in prefs.hiddenShelves)
+        refreshHomeLayout()
+    }
+
+    fun moveShelf(shelf: HomeShelf, delta: Int) {
+        prefs.moveShelf(shelf, delta)
+        refreshHomeLayout()
+    }
+
+    fun resetHomeLayout() {
+        prefs.resetHomeLayout()
+        refreshHomeLayout()
+    }
 
     val libraryConfigured: Boolean get() = prefs.libraryConfigured
     val libraryLabel: String get() = prefs.libraryLabel

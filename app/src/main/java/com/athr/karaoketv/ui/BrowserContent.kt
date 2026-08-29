@@ -34,6 +34,7 @@ import com.athr.karaoketv.ui.home.HomeShelves
 import com.athr.karaoketv.ui.components.ScreenNavBar
 import com.athr.karaoketv.ui.queue.QueueScreen
 import com.athr.karaoketv.ui.search.SearchScreen
+import com.athr.karaoketv.ui.setup.HomeLayoutScreen
 import com.athr.karaoketv.ui.setup.SettingsScreen
 import com.athr.karaoketv.ui.theme.KaraokeColors
 
@@ -55,7 +56,13 @@ fun BrowserContent(
             // Home is the root: nothing to go back to, and it already carries its
             // own button row.
             if (screen != Screen.Home) {
-                ScreenNavBar(onBack = onBack, onHome = onHome, onWatchVideo = onWatchVideo)
+                ScreenNavBar(
+                    onBack = onBack,
+                    onHome = onHome,
+                    onWatchVideo = onWatchVideo,
+                    // Search puts focus on its keyboard instead.
+                    takeInitialFocus = screen != Screen.Search,
+                )
             }
             Box(Modifier.weight(1f)) {
                 when (screen) {
@@ -65,7 +72,8 @@ fun BrowserContent(
                     Screen.Categories -> CategoriesRoute(vm, onNavigate)
                     Screen.Artists -> ArtistsRoute(vm, onNavigate)
                     Screen.Queue -> QueueRoute(vm)
-                    Screen.Settings -> SettingsRoute(vm, onOpenSetup)
+                    Screen.Settings -> SettingsRoute(vm, onOpenSetup, onNavigate)
+                    Screen.HomeLayout -> HomeLayoutRoute(vm)
                     is Screen.SongList ->
                         SongListRoute(vm, screen, onSongSelected, onSongOptions)
                 }
@@ -92,9 +100,13 @@ private fun HomeRoute(
     val categories by vm.categories.collectAsStateWithLifecycle()
     val artists by vm.artists.collectAsStateWithLifecycle()
 
+    val layout by vm.homeLayout.collectAsStateWithLifecycle()
+
     HomeScreen(
         songCount = songCount,
         libraryLabel = vm.libraryLabel,
+        shelfOrder = layout.order,
+        hiddenShelves = layout.hidden,
         shelves = HomeShelves(
             queue = queue,
             recentlyPlayed = recentlyPlayed,
@@ -199,7 +211,11 @@ private fun QueueRoute(vm: KaraokeViewModel) {
 }
 
 @Composable
-private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
+private fun SettingsRoute(
+    vm: KaraokeViewModel,
+    onOpenSetup: () -> Unit,
+    onNavigate: (Screen) -> Unit,
+) {
     val songCount by vm.songCount.collectAsStateWithLifecycle()
     val scanState by vm.scanState.collectAsStateWithLifecycle()
     val scaleMode by vm.player.scaleMode.collectAsStateWithLifecycle()
@@ -244,6 +260,7 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
         onCycleScale = vm.player::cycleScaleMode,
         onResetPitch = { vm.player.setPitch(0) },
         onClearLibrary = onOpenSetup,
+        onOpenHomeLayout = { onNavigate(Screen.HomeLayout) },
         onUpdateAction = {
             when (updateState) {
                 is UpdateState.Available -> vm.downloadUpdate(context)
@@ -316,12 +333,25 @@ private fun SongListRoute(
 }
 
 @Composable
+private fun HomeLayoutRoute(vm: KaraokeViewModel) {
+    val layout by vm.homeLayout.collectAsStateWithLifecycle()
+    HomeLayoutScreen(
+        order = layout.order,
+        hidden = layout.hidden,
+        onToggle = vm::toggleShelf,
+        onMoveUp = { vm.moveShelf(it, -1) },
+        onMoveDown = { vm.moveShelf(it, +1) },
+        onReset = vm::resetHomeLayout,
+    )
+}
+
+@Composable
 private fun KeyHints(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(Color(0x99000000))
-            .padding(horizontal = 48.dp, vertical = 10.dp),
+            .padding(horizontal = 58.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.End,
     ) {
         Text(

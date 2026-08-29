@@ -48,6 +48,7 @@ fun SettingsScreen(
     onResetPitch: () -> Unit,
     onClearLibrary: () -> Unit,
     onUpdateAction: () -> Unit,
+    onOpenHomeLayout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -88,6 +89,15 @@ fun SettingsScreen(
             }
         }
 
+        item {
+            SettingRow(
+                title = "Bố cục màn hình chính",
+                description = "Chọn hàng nào hiện và theo thứ tự nào",
+                value = "Sắp xếp",
+                highlighted = false,
+                onClick = onOpenHomeLayout,
+            )
+        }
         item {
             SettingRow(
                 title = "Tự động hát bài kế",

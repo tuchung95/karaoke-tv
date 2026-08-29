@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.ui.theme.KaraokeColors
+import com.athr.karaoketv.ui.theme.TvSpacing
 import com.athr.karaoketv.util.formatDuration
 
 /** Wide card for the horizontal shelves on the home screen. */
@@ -40,7 +41,7 @@ fun SongCard(
     TvFocusable(
         onClick = onClick,
         onLongClick = onLongClick,
-        modifier = modifier.width(300.dp),
+        modifier = modifier.width(TvSpacing.CardWidth3Up),
         focusRequester = focusRequester,
         contentPadding = PaddingValues(18.dp),
     ) { focused ->
@@ -169,7 +170,7 @@ fun GroupCard(
 ) {
     TvFocusable(
         onClick = onClick,
-        modifier = modifier.width(260.dp),
+        modifier = modifier.width(TvSpacing.CardWidth4Up),
         focusRequester = focusRequester,
         contentPadding = PaddingValues(18.dp),
     ) { _ ->

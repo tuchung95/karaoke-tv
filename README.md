@@ -105,6 +105,37 @@ phát ở bất kỳ chỗ nào khác đều dính quảng cáo kể cả khi b�
 chỉnh tông, không bỏ giọng ca sĩ, không vào hàng chờ được**. Ba thứ đó chỉ áp
 dụng cho file trên ổ cứng.
 
+## Tự cập nhật
+
+Cài đặt → **Phiên bản** → Kiểm tra → Tải về → Cài đặt. App đọc bản phát hành mới
+nhất trên GitHub Releases, tải APK rồi giao cho trình cài đặt của hệ thống. Lần đầu
+box sẽ hỏi cấp quyền cài đặt cho app; bật xong quay lại bấm Cài đặt lần nữa.
+
+Phía người phát hành:
+
+```bash
+./tools/release.sh 1.2 "Ghi chú thay đổi"
+```
+
+Script tăng versionCode (bắt buộc, thiếu là Android từ chối cài đè), build bản đã
+ký, gắn thẻ, đẩy lên và đính APK vào release. Bản mới **phải ký bằng đúng keystore
+cũ**, nếu không sẽ không cài đè được.
+
+## Bố cục và giao diện
+
+Theo [hướng dẫn thiết kế Android TV](https://developer.android.com/design/ui/tv):
+khung 960×540dp, lề an toàn 58dp hai bên và 28dp trên dưới, lưới 12 cột với gutter
+20dp — 844dp nội dung chia vừa đúng 3 thẻ bài hát (268dp) hoặc 4 thẻ nhóm (196dp).
+
+Màn hình chính tuỳ chỉnh được: Cài đặt → **Bố cục màn hình chính** cho phép ẩn/hiện
+và đổi thứ tự từng hàng (Đang chờ, Hát gần đây, Yêu thích, Hát nhiều nhất, Thể loại,
+Ca sĩ, Mới thêm).
+
+Mọi màn hình dưới Trang chủ đều có thanh **Quay lại / Trang chủ / Xem video** ở trên
+cùng, và nó cũng là nơi focus rơi vào khi mở màn hình — phím BACK vẫn làm được điều
+đó, nhưng không phải remote nào cũng có phím BACK rõ ràng, và khách cầm remote giữa
+buổi hát thì không biết cử chỉ đó tồn tại.
+
 ## Thử trên máy Mac trước, không cần box
 
 ```bash

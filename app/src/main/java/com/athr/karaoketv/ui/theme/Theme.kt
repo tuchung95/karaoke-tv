@@ -58,12 +58,23 @@ private val TvTypography = Typography(
     labelMedium = TextStyle(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
 )
 
-/** TVs overscan; nothing important goes closer than this to the panel edge. */
+/**
+ * Android TV's layout grid, at the 960x540dp canvas every TV renders to.
+ *
+ * 48dp/24dp is the bare overscan margin; the guidelines put the recommended safe
+ * zone at 58dp on the sides and 28dp top and bottom, which is what these are. The
+ * 12-column grid is 52dp columns with 20dp gutters, leaving 844dp of usable width
+ * — which is why the card widths below divide it exactly.
+ */
 object TvSpacing {
-    val ScreenHorizontal = 48.dp
-    val ScreenVertical = 32.dp
+    val ScreenHorizontal = 58.dp
+    val ScreenVertical = 28.dp
     val Gutter = 20.dp
-    val CardGap = 16.dp
+    val CardGap = 20.dp
+
+    /** 844dp of content width, split by the grid. */
+    val CardWidth3Up = 268.dp
+    val CardWidth4Up = 196.dp
 }
 
 @Composable

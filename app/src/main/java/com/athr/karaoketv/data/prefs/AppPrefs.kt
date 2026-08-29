@@ -55,6 +55,46 @@ class AppPrefs(context: Context) {
         get() = sp.getBoolean(KEY_YT_KEYWORD, true)
         set(value) = sp.edit { putBoolean(KEY_YT_KEYWORD, value) }
 
+    /**
+     * Home shelves in display order. Unknown keys are dropped and shelves added in
+     * a later version are appended, so an old saved order never hides a new row.
+     */
+    var homeShelfOrder: List<HomeShelf>
+        get() {
+            val saved = sp.getString(KEY_SHELF_ORDER, null)
+                ?.split(',')
+                ?.mapNotNull { HomeShelf.fromKey(it.trim()) }
+                .orEmpty()
+            return saved + HomeShelf.DEFAULT_ORDER.filterNot { it in saved }
+        }
+        set(value) = sp.edit { putString(KEY_SHELF_ORDER, value.joinToString(",") { it.key }) }
+
+    var hiddenShelves: Set<HomeShelf>
+        get() = sp.getStringSet(KEY_SHELF_HIDDEN, emptySet())
+            .orEmpty()
+            .mapNotNull { HomeShelf.fromKey(it) }
+            .toSet()
+        set(value) = sp.edit { putStringSet(KEY_SHELF_HIDDEN, value.map { it.key }.toSet()) }
+
+    fun setShelfVisible(shelf: HomeShelf, visible: Boolean) {
+        hiddenShelves = if (visible) hiddenShelves - shelf else hiddenShelves + shelf
+    }
+
+    fun moveShelf(shelf: HomeShelf, delta: Int) {
+        val order = homeShelfOrder.toMutableList()
+        val from = order.indexOf(shelf)
+        if (from < 0) return
+        val to = (from + delta).coerceIn(0, order.lastIndex)
+        if (to == from) return
+        order.add(to, order.removeAt(from))
+        homeShelfOrder = order
+    }
+
+    fun resetHomeLayout() {
+        homeShelfOrder = HomeShelf.DEFAULT_ORDER
+        hiddenShelves = emptySet()
+    }
+
     val libraryConfigured: Boolean get() = !libraryUri.isNullOrBlank()
 
     fun libraryUriFlow(): Flow<String?> = keyFlow(KEY_LIBRARY_URI).map { libraryUri }
@@ -81,5 +121,7 @@ class AppPrefs(context: Context) {
         private const val KEY_SCALE_MODE = "video_scale_mode"
         private const val KEY_PITCH = "pitch_semitones"
         private const val KEY_YT_KEYWORD = "youtube_append_karaoke"
+        private const val KEY_SHELF_ORDER = "home_shelf_order"
+        private const val KEY_SHELF_HIDDEN = "home_shelf_hidden"
     }
 }

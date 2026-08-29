@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,7 +78,7 @@ fun NowPlayingHud(
                     .background(
                         Brush.verticalGradient(listOf(Color(0xCC000000), Color.Transparent))
                     )
-                    .padding(horizontal = 48.dp, vertical = 28.dp)
+                    .padding(horizontal = 58.dp, vertical = 28.dp)
             ) {
                 Row(verticalAlignment = Alignment.Top) {
                     Column(Modifier.weight(1f)) {
@@ -149,7 +151,7 @@ fun NowPlayingHud(
                     .background(
                         Brush.verticalGradient(listOf(Color.Transparent, Color(0xCC000000)))
                     )
-                    .padding(horizontal = 48.dp, vertical = 24.dp)
+                    .padding(horizontal = 58.dp, vertical = 28.dp)
             ) {
                 ProgressBar(position)
                 Spacer(Modifier.height(6.dp))
@@ -176,7 +178,7 @@ fun NowPlayingHud(
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 48.dp, bottom = 96.dp),
+                .padding(start = 58.dp, bottom = 96.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -248,7 +250,8 @@ fun ControlBar(
             .fillMaxWidth()
             .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xE6000000))))
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 48.dp, vertical = 28.dp),
+            .focusGroup()
+            .padding(horizontal = 58.dp, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

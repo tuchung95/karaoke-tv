@@ -11,6 +11,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,7 +33,14 @@ fun ScreenNavBar(
     onHome: () -> Unit,
     onWatchVideo: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    takeInitialFocus: Boolean = true,
 ) {
+    // Every screen below Home starts with focus here. Without an explicit target
+    // Compose assigns focus on the first key press instead of before it, so the
+    // viewer's first press on the remote does nothing at all.
+    val backFocus = remember { FocusRequester() }
+    if (takeInitialFocus) RequestInitialFocus(backFocus)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -48,6 +57,7 @@ fun ScreenNavBar(
             text = "Quay lại",
             onClick = onBack,
             icon = Icons.AutoMirrored.Filled.ArrowBack,
+            focusRequester = if (takeInitialFocus) backFocus else null,
         )
         TvButton(text = "Trang chủ", onClick = onHome, icon = Icons.Filled.Home)
         if (onWatchVideo != null) {

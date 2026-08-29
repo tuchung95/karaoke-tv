@@ -1,5 +1,6 @@
 package com.athr.karaoketv.ui.home
 
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,9 +32,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.db.LibraryGroup
 import com.athr.karaoketv.data.db.SongEntity
+import com.athr.karaoketv.data.prefs.HomeShelf
 import com.athr.karaoketv.player.QueueItem
 import com.athr.karaoketv.ui.components.GroupCard
 import com.athr.karaoketv.ui.components.RequestInitialFocus
@@ -74,6 +77,8 @@ fun HomeScreen(
     songCount: Int,
     libraryLabel: String,
     shelves: HomeShelves,
+    shelfOrder: List<HomeShelf>,
+    hiddenShelves: Set<HomeShelf>,
     actions: HomeActions,
     modifier: Modifier = Modifier,
 ) {
@@ -116,7 +121,9 @@ fun HomeScreen(
                 // initial focus request to attach, which leaves the whole screen
                 // unfocused and the remote dead until some direction key is pressed.
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .focusGroup(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     TvButton(
@@ -141,32 +148,37 @@ fun HomeScreen(
             }
         }
 
-        if (shelves.queue.isNotEmpty()) {
-            songShelf(
-                title = "Đang chờ",
-                subtitle = "${shelves.queue.size} bài",
-                songs = shelves.queue.map { it.song },
-                onClick = { actions.onQueue() },
-                onOptions = actions.onSongOptions,
-            )
-        }
-        if (shelves.recentlyPlayed.isNotEmpty()) {
-            songShelf("Hát gần đây", null, shelves.recentlyPlayed, actions.onSongClick, actions.onSongOptions)
-        }
-        if (shelves.favorites.isNotEmpty()) {
-            songShelf("Yêu thích", null, shelves.favorites, actions.onSongClick, actions.onSongOptions)
-        }
-        if (shelves.mostPlayed.isNotEmpty()) {
-            songShelf("Hát nhiều nhất", null, shelves.mostPlayed, actions.onSongClick, actions.onSongOptions)
-        }
-        if (shelves.categories.isNotEmpty()) {
-            groupShelf("Thể loại / Thư mục", shelves.categories, actions.onCategoryClick)
-        }
-        if (shelves.artists.isNotEmpty()) {
-            groupShelf("Ca sĩ", shelves.artists, actions.onArtistClick)
-        }
-        if (shelves.recentlyAdded.isNotEmpty()) {
-            songShelf("Mới thêm vào ổ cứng", null, shelves.recentlyAdded, actions.onSongClick, actions.onSongOptions)
+        // Order and visibility come from Settings -> Bố cục màn hình chính.
+        shelfOrder.filterNot { it in hiddenShelves }.forEach { shelf ->
+            when (shelf) {
+                HomeShelf.QUEUE -> if (shelves.queue.isNotEmpty()) {
+                    songShelf(
+                        title = shelf.label,
+                        subtitle = "${shelves.queue.size} bài",
+                        songs = shelves.queue.map { it.song },
+                        onClick = { actions.onQueue() },
+                        onOptions = actions.onSongOptions,
+                    )
+                }
+                HomeShelf.RECENTLY_PLAYED -> if (shelves.recentlyPlayed.isNotEmpty()) {
+                    songShelf(shelf.label, null, shelves.recentlyPlayed, actions.onSongClick, actions.onSongOptions)
+                }
+                HomeShelf.FAVORITES -> if (shelves.favorites.isNotEmpty()) {
+                    songShelf(shelf.label, null, shelves.favorites, actions.onSongClick, actions.onSongOptions)
+                }
+                HomeShelf.MOST_PLAYED -> if (shelves.mostPlayed.isNotEmpty()) {
+                    songShelf(shelf.label, null, shelves.mostPlayed, actions.onSongClick, actions.onSongOptions)
+                }
+                HomeShelf.CATEGORIES -> if (shelves.categories.isNotEmpty()) {
+                    groupShelf(shelf.label, shelves.categories, actions.onCategoryClick)
+                }
+                HomeShelf.ARTISTS -> if (shelves.artists.isNotEmpty()) {
+                    groupShelf(shelf.label, shelves.artists, actions.onArtistClick)
+                }
+                HomeShelf.RECENTLY_ADDED -> if (shelves.recentlyAdded.isNotEmpty()) {
+                    songShelf(shelf.label, null, shelves.recentlyAdded, actions.onSongClick, actions.onSongOptions)
+                }
+            }
         }
     }
 }

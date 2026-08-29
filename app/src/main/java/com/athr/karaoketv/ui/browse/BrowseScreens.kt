@@ -38,7 +38,7 @@ fun GroupGridScreen(
     ) {
         ScreenTitle(title, "${groups.size} mục")
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 260.dp),
+            columns = GridCells.Adaptive(minSize = TvSpacing.CardWidth4Up),
             contentPadding = PaddingValues(
                 start = TvSpacing.ScreenHorizontal,
                 end = TvSpacing.ScreenHorizontal,
