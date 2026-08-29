@@ -84,9 +84,15 @@ fun HomeTopBar(
             selectedTabIndex = HomeTab.entries.indexOf(selected),
             separator = { Spacer(Modifier.width(4.dp)) },
             indicator = { tabPositions, doesTabRowHaveFocus ->
+                // Same fill whether or not the row has focus. Left to itself the
+                // pill switches between a bright and a dim surface, and then no
+                // single label colour is readable in both states — one of them
+                // ends up light-on-light or dark-on-dark.
                 TabRowDefaults.PillIndicator(
                     currentTabPosition = tabPositions[HomeTab.entries.indexOf(selected)],
                     doesTabRowHaveFocus = doesTabRowHaveFocus,
+                    activeColor = KaraokeColors.OnSurface,
+                    inactiveColor = KaraokeColors.OnSurface,
                 )
             },
         ) {
@@ -100,11 +106,13 @@ fun HomeTopBar(
                     // light on the dim pill, dark on the bright one. Using one
                     // colour for both leaves the selected tab unreadable in one
                     // state or the other.
+                    // The pill is always light, so every selected state is dark
+                    // text on it and every unselected one is light text on the bar.
                     colors = TabDefaults.pillIndicatorTabColors(
                         contentColor = KaraokeColors.Muted,
                         inactiveContentColor = KaraokeColors.Muted,
-                        selectedContentColor = KaraokeColors.OnSurface,
-                        focusedContentColor = KaraokeColors.Background,
+                        selectedContentColor = KaraokeColors.Background,
+                        focusedContentColor = KaraokeColors.Muted,
                         focusedSelectedContentColor = KaraokeColors.Background,
                     ),
                 ) {
