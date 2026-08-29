@@ -263,6 +263,7 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                 },
                 onCycleScale = player::cycleScaleMode,
                 onOpenQueue = { push(Screen.Queue) },
+                onOpenMenu = { browserVisible = true },
                 firstFocus = controlFocus,
             )
         }

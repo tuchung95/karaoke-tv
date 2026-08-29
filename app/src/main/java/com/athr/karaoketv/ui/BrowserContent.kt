@@ -101,10 +101,12 @@ private fun HomeRoute(
     val artists by vm.artists.collectAsStateWithLifecycle()
 
     val layout by vm.homeLayout.collectAsStateWithLifecycle()
+    val current by vm.player.current.collectAsStateWithLifecycle()
 
     HomeScreen(
         songCount = songCount,
         libraryLabel = vm.libraryLabel,
+        nowPlaying = current?.song,
         shelfOrder = layout.order,
         hiddenShelves = layout.hidden,
         shelves = HomeShelves(
@@ -194,6 +196,7 @@ private fun ArtistsRoute(vm: KaraokeViewModel, onNavigate: (Screen) -> Unit) {
 private fun QueueRoute(vm: KaraokeViewModel) {
     val current by vm.player.current.collectAsStateWithLifecycle()
     val queue by vm.player.queue.collectAsStateWithLifecycle()
+
     QueueScreen(
         current = current,
         queue = queue,

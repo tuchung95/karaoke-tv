@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SkipNext
@@ -120,6 +121,13 @@ fun NowPlayingHud(
                             )
                         }
                     }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "▲ Menu   ▼ Điều khiển",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = KaraokeColors.Muted,
+                        )
+                        Spacer(Modifier.height(6.dp))
                     if (queueSize > 0) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -134,6 +142,7 @@ fun NowPlayingHud(
                                 color = KaraokeColors.Accent,
                             )
                         }
+                    }
                     }
                 }
             }
@@ -240,6 +249,7 @@ fun ControlBar(
     onCycleAudioTrack: () -> Unit,
     onCycleScale: () -> Unit,
     onOpenQueue: () -> Unit,
+    onOpenMenu: () -> Unit,
     firstFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
@@ -255,6 +265,13 @@ fun ControlBar(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // A visible way back to the library. BACK and the up key both do this too,
+        // but neither is discoverable to whoever was just handed the remote.
+        TvButton(
+            text = "Menu",
+            onClick = onOpenMenu,
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
+        )
         TvButton(
             text = if (isPlaying) "Tạm dừng" else "Phát",
             icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,

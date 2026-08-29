@@ -130,6 +130,31 @@ Script tăng versionCode (bắt buộc, thiếu là Android từ chối cài đ�
 ký, gắn thẻ, đẩy lên và đính APK vào release. Bản mới **phải ký bằng đúng keystore
 cũ**, nếu không sẽ không cài đè được.
 
+## Màn hình chính
+
+Dựng theo bố cục home của Google TV: một hàng trên gồm phím tìm kiếm tròn, dải tab
+(`TabRow`/`Tab`) cho các điểm đến, nhóm nút tròn tiện ích (`IconButton`) và tóm tắt
+thư viện; bên dưới là dải hero tràn viền lấy ảnh từ video, rồi các hàng thẻ 16:9.
+
+Hero hiện bài đang hát; lúc rảnh thì đưa ra bài nhà này hát nhiều nhất — lời mời
+tốt hơn một khoảng trống.
+
+Ảnh hero tràn hết mép màn hình vì hướng dẫn Google yêu cầu phần tử nền không bị cắt
+theo vùng overscan; riêng chữ vẫn nằm trong lề an toàn.
+
+## Hàng chờ
+
+Dùng `NavigationDrawer`: danh sách bài ở drawer trái, bài đang chọn và các thao tác
+ở khung phải.
+
+Cần nói rõ một đánh đổi: [hướng dẫn của
+Google](https://developer.android.com/design/ui/tv/guides/components/navigation-drawer)
+định component này cho 3–7 điểm đến của app và khuyên không nhét nhiều mục. Hàng chờ
+karaoke thì không có trần, nên nó cuộn. Cái được là năm thao tác chỉ xuất hiện một
+lần ở khung phải thay vì lặp trên từng dòng — bản trước treo cả năm nút vào mỗi
+dòng, thành bức tường nút và các dòng so le vì bài đầu không "lên" được, bài cuối
+không "xuống" được.
+
 ## Đối chiếu chuẩn chất lượng app TV của Google
 
 Soát theo [TV app quality](https://developer.android.com/docs/quality-guidelines/tv-app-quality),

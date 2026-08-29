@@ -1,0 +1,155 @@
+package com.athr.karaoketv.ui.home
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Button
+import androidx.tv.material3.IconButton
+import androidx.tv.material3.IconButtonDefaults
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Tab
+import androidx.tv.material3.TabRow
+import androidx.tv.material3.TabRowDefaults
+import androidx.tv.material3.Text
+import com.athr.karaoketv.ui.theme.KaraokeColors
+
+/** The destinations that sit in the tab strip, in order. */
+enum class HomeTab(val label: String) {
+    HOME("Trang chủ"),
+    CATEGORIES("Thể loại"),
+    ARTISTS("Ca sĩ"),
+    ALL_SONGS("Tất cả bài"),
+    FAVORITES("Yêu thích"),
+}
+
+/**
+ * The top strip: a search key and the destination tabs in one pill, the utility
+ * actions in another, and the library summary on the right — the shape Google TV
+ * uses on its own home screen, so the remote lands where a viewer already expects.
+ */
+@Composable
+fun HomeTopBar(
+    selected: HomeTab,
+    summary: String,
+    onSearch: () -> Unit,
+    onTab: (HomeTab) -> Unit,
+    onQueue: () -> Unit,
+    onShuffle: () -> Unit,
+    onSettings: () -> Unit,
+    queueSize: Int,
+    searchFocus: FocusRequester,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        RoundIconButton(
+            icon = Icons.Filled.Search,
+            description = "Tìm bài",
+            onClick = onSearch,
+            focusRequester = searchFocus,
+        )
+
+        TabRow(
+            selectedTabIndex = HomeTab.entries.indexOf(selected),
+            separator = { Spacer(Modifier.width(4.dp)) },
+            indicator = { tabPositions, doesTabRowHaveFocus ->
+                TabRowDefaults.PillIndicator(
+                    currentTabPosition = tabPositions[HomeTab.entries.indexOf(selected)],
+                    doesTabRowHaveFocus = doesTabRowHaveFocus,
+                )
+            },
+        ) {
+            HomeTab.entries.forEach { tab ->
+                Tab(
+                    selected = tab == selected,
+                    onFocus = {},
+                    onClick = { onTab(tab) },
+                ) {
+                    Text(
+                        text = tab.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.width(4.dp))
+        RoundIconButton(
+            icon = Icons.AutoMirrored.Filled.QueueMusic,
+            description = if (queueSize == 0) "Hàng chờ" else "Hàng chờ, $queueSize bài",
+            onClick = onQueue,
+            highlighted = queueSize > 0,
+        )
+        RoundIconButton(Icons.Filled.Casino, "Hát ngẫu nhiên", onShuffle)
+        RoundIconButton(Icons.Filled.Settings, "Cài đặt", onSettings)
+
+        Spacer(Modifier.weight(1f))
+        Text(
+            text = summary,
+            style = MaterialTheme.typography.labelLarge,
+            color = KaraokeColors.Muted,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun RoundIconButton(
+    icon: ImageVector,
+    description: String,
+    onClick: () -> Unit,
+    highlighted: Boolean = false,
+    focusRequester: FocusRequester? = null,
+) {
+    // IconButton, not Button with zero padding: the design system sizes and centres
+    // the glyph itself, which is what the hand-rolled version was getting wrong.
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(IconButtonDefaults.MediumButtonSize)
+            .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
+        shape = IconButtonDefaults.shape(shape = CircleShape),
+        colors = IconButtonDefaults.colors(
+            containerColor = KaraokeColors.Surface,
+            contentColor = if (highlighted) KaraokeColors.Accent else KaraokeColors.Muted,
+            focusedContainerColor = KaraokeColors.OnSurface,
+            focusedContentColor = KaraokeColors.Background,
+        ),
+    ) {
+        Icon(
+            icon,
+            contentDescription = description,
+            modifier = Modifier.size(IconButtonDefaults.MediumIconSize),
+        )
+    }
+}
+
+/** Kept so the bar can sit on its own tinted band, as in the reference layout. */
+@Composable
+fun TopBarBackground(modifier: Modifier = Modifier) {
+    Spacer(modifier.background(KaraokeColors.Scrim))
+}

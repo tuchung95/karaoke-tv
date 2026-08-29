@@ -77,6 +77,7 @@ data class HomeActions(
 fun HomeScreen(
     songCount: Int,
     libraryLabel: String,
+    nowPlaying: SongEntity?,
     shelves: HomeShelves,
     shelfOrder: List<HomeShelf>,
     hiddenShelves: Set<HomeShelf>,
@@ -88,72 +89,50 @@ fun HomeScreen(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
+        // No horizontal padding here: the hero artwork is a background element and
+        // the guidelines want those running to the panel edge. Every other block
+        // applies the safe margin itself.
         contentPadding = PaddingValues(
-            start = TvSpacing.ScreenHorizontal,
-            end = TvSpacing.ScreenHorizontal,
             top = TvSpacing.ScreenVertical,
             bottom = 64.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(28.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         item {
-            Column {
-                // Settings sits up on the title line rather than at the end of the
-                // shelf row: it is the one destination nobody wants to walk past
-                // seven other buttons to reach.
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Karaoke",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = KaraokeColors.Primary,
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Text(
-                        text = if (songCount > 0) {
-                            "${formatCount(songCount)} bài · $libraryLabel"
-                        } else {
-                            "Chưa quét được bài nào"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = KaraokeColors.Muted,
-                    )
-                    Spacer(Modifier.weight(1f))
-                    TvButton("Cài đặt", actions.onSettings, icon = Icons.Filled.Settings)
-                }
-                Spacer(Modifier.height(20.dp))
-                // Scrolls, but as a plain Row: eight buttons do not fit 1920px, and a
-                // clipped button that focus can still reach is a button nobody knows
-                // is there. Not a LazyRow — its items compose too late for the
-                // initial focus request to attach, which leaves the whole screen
-                // unfocused and the remote dead until some direction key is pressed.
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .focusGroup(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    TvButton(
-                        text = "Tìm bài",
-                        onClick = actions.onSearch,
-                        icon = Icons.Filled.Search,
-                        emphasised = true,
-                        focusRequester = searchFocus,
-                    )
-                    TvButton(
-                        text = if (shelves.queue.isEmpty()) "Hàng chờ" else "Hàng chờ (${shelves.queue.size})",
-                        onClick = actions.onQueue,
-                        icon = Icons.AutoMirrored.Filled.QueueMusic,
-                    )
-                    TvButton("Thể loại", actions.onCategories, icon = Icons.Filled.Folder)
-                    TvButton("Ca sĩ", actions.onArtists, icon = Icons.Filled.Person)
-                    TvButton("Tất cả bài", actions.onAllSongs, icon = Icons.Filled.LibraryMusic)
-                    TvButton("Yêu thích", actions.onFavorites, icon = Icons.Filled.Mic)
-                    TvButton("Ngẫu nhiên", actions.onShuffle, icon = Icons.Filled.Casino)
-                }
-            }
+            HomeTopBar(
+                selected = HomeTab.HOME,
+                summary = if (songCount > 0) {
+                    "${formatCount(songCount)} bài · $libraryLabel"
+                } else {
+                    "Chưa quét được bài nào"
+                },
+                onSearch = actions.onSearch,
+                onTab = { tab ->
+                    when (tab) {
+                        HomeTab.HOME -> Unit
+                        HomeTab.CATEGORIES -> actions.onCategories()
+                        HomeTab.ARTISTS -> actions.onArtists()
+                        HomeTab.ALL_SONGS -> actions.onAllSongs()
+                        HomeTab.FAVORITES -> actions.onFavorites()
+                    }
+                },
+                onQueue = actions.onQueue,
+                onShuffle = actions.onShuffle,
+                onSettings = actions.onSettings,
+                queueSize = shelves.queue.size,
+                searchFocus = searchFocus,
+                modifier = Modifier.padding(horizontal = TvSpacing.ScreenHorizontal),
+            )
+        }
+
+        item {
+            val playing = shelves.queue.firstOrNull()?.song
+            HeroBanner(
+                song = nowPlaying ?: shelves.mostPlayed.firstOrNull()
+                    ?: shelves.recentlyAdded.firstOrNull()
+                    ?: playing,
+                nowPlaying = nowPlaying != null,
+            )
         }
 
         // Order and visibility come from Settings -> Bố cục màn hình chính.
@@ -200,9 +179,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.songShelf(
 ) {
     item(key = "shelf-$title") {
         Column {
-            SectionHeader(title, trailing = subtitle)
+            SectionHeader(
+                title,
+                trailing = subtitle,
+                modifier = Modifier.padding(start = TvSpacing.ScreenHorizontal),
+            )
             Spacer(Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap)) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                contentPadding = PaddingValues(horizontal = TvSpacing.ScreenHorizontal),
+            ) {
                 // No stable key: the same song may legitimately sit in the queue twice.
                 items(songs) { song ->
                     SongCard(
@@ -223,9 +209,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.groupShelf(
 ) {
     item(key = "groups-$title") {
         Column {
-            SectionHeader(title, trailing = "${groups.size} mục")
+            SectionHeader(
+                title,
+                trailing = "${groups.size} mục",
+                modifier = Modifier.padding(start = TvSpacing.ScreenHorizontal),
+            )
             Spacer(Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap)) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                contentPadding = PaddingValues(horizontal = TvSpacing.ScreenHorizontal),
+            ) {
                 items(groups, key = { it.name }) { group ->
                     GroupCard(
                         name = group.name,
