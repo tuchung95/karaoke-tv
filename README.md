@@ -172,6 +172,10 @@ khác.
 | ◀ ▶ | Tua 10 giây |
 | BACK | Về menu |
 
+Mở hàng chờ từ lớp video rồi bấm **Quay lại** thì về thẳng video, không rơi về màn
+hình chính — người ta rời khỏi bài hát để liếc hàng chờ, chứ không phải để đi chỗ
+khác. Bấm **Trang chủ** thì bỏ ràng buộc đó, vì lúc ấy họ chủ động muốn đi.
+
 Âm thanh: focus và chọn dùng hiệu ứng có sẵn của hệ thống, nên khớp với mọi app
 khác trên box và tự im khi người dùng tắt âm hệ thống. Tìm bằng giọng nói có tông
 riêng lúc bắt đầu nghe, lúc nhận được kết quả và lúc thất bại — đó là thao tác duy

@@ -139,6 +139,17 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
     val stageFocus = remember { FocusRequester() }
     val controlFocus = remember { FocusRequester() }
 
+    // Set when the browser was opened from full-screen playback, so backing out
+    // of it returns to the picture instead of dumping the room on the home screen.
+    var openedFromVideo by remember { mutableStateOf(false) }
+
+    fun leaveBrowser(): Boolean {
+        if (!openedFromVideo) return false
+        openedFromVideo = false
+        browserVisible = false
+        return true
+    }
+
     fun push(screen: Screen) {
         backStack.add(screen)
         browserVisible = true
@@ -197,7 +208,11 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
     BackHandler {
         when {
             controlsVisible -> controlsVisible = false
-            browserVisible && backStack.size > 1 -> backStack.removeAt(backStack.lastIndex)
+            browserVisible && backStack.size > 1 -> {
+                backStack.removeAt(backStack.lastIndex)
+                if (backStack.size == 1) leaveBrowser()
+            }
+            browserVisible && openedFromVideo -> leaveBrowser()
             browserVisible && current != null -> browserVisible = false
             !browserVisible -> browserVisible = true
             // A shared remote gets pressed by everyone; one stray BACK should not
@@ -297,6 +312,7 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
             VideoTopBar(
                 onOpenMenu = { browserVisible = true },
                 onOpenQueue = {
+                    openedFromVideo = true
                     if (backStack.lastOrNull() != Screen.Queue) push(Screen.Queue)
                     browserVisible = true
                 },
@@ -345,9 +361,15 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                     onSongOptions = { song -> actionSheetSong = song },
                     onOpenSetup = { setupVisible = true },
                     onBack = {
-                        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                        if (backStack.size > 1) {
+                            backStack.removeAt(backStack.lastIndex)
+                            if (backStack.size == 1) leaveBrowser()
+                        } else {
+                            leaveBrowser()
+                        }
                     },
                     onHome = {
+                        openedFromVideo = false
                         if (backStack.size > 1) backStack.removeRange(1, backStack.size)
                     },
                     onWatchVideo = if (current != null) {
