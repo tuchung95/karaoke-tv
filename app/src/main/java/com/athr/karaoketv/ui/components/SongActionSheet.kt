@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.VerticalAlignTop
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ fun SongActionSheet(
     onQueue: () -> Unit,
     onQueueNext: () -> Unit,
     onToggleFavorite: () -> Unit,
+    onSwapTitleArtist: () -> Unit,
 ) {
     val firstFocus = remember { FocusRequester() }
     RequestInitialFocus(firstFocus, key = song.id)
@@ -92,6 +94,16 @@ fun SongActionSheet(
                 icon = Icons.Filled.VerticalAlignTop,
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (!song.artist.isNullOrBlank()) {
+                TvButton(
+                    // Filenames use both "Tên bài - Ca sĩ" and "Ca sĩ - Tên bài" and
+                    // often give no way to tell which; one press fixes a wrong guess.
+                    text = "Đổi tên bài ↔ ca sĩ",
+                    onClick = { onSwapTitleArtist(); onDismiss() },
+                    icon = Icons.Filled.SwapHoriz,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             TvButton(
                 text = if (song.favorite) "Bỏ yêu thích" else "Thêm vào yêu thích",
                 onClick = { onToggleFavorite(); onDismiss() },

@@ -55,6 +55,12 @@ data class SongEntity(
     val lastPlayedAt: Long = 0L,
     val favorite: Boolean = false,
     val addedAt: Long = 0L,
+    /**
+     * The viewer corrected this row's title and artist. Filenames follow two
+     * opposite conventions and nothing in them always says which, so a manual fix
+     * has to outlive the next rescan.
+     */
+    val swapped: Boolean = false,
 
     /** Stamp of the scan that last saw this file; older rows are pruned after a scan. */
     val scanStamp: Long = 0L,

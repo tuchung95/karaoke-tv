@@ -13,7 +13,9 @@ interface SongDao {
     suspend fun upsertAll(songs: List<SongEntity>)
 
     /** Carries user state across a rescan so play counts and favourites survive. */
-    @Query("SELECT id, playCount, lastPlayedAt, favorite, durationMs, addedAt FROM songs")
+    @Query(
+        "SELECT id, playCount, lastPlayedAt, favorite, durationMs, addedAt, swapped FROM songs"
+    )
     suspend fun loadUserState(): List<UserState>
 
     @Query("DELETE FROM songs WHERE scanStamp != :stamp")
@@ -123,6 +125,28 @@ interface SongDao {
     )
     suspend fun markPlayed(id: String, at: Long)
 
+    @Query(
+        """
+        UPDATE songs SET
+            title = :title, titleKey = :titleKey, titleCompact = :titleCompact,
+            titleInitials = :titleInitials,
+            artist = :artist, artistKey = :artistKey, artistCompact = :artistCompact,
+            swapped = :swapped
+        WHERE id = :id
+        """
+    )
+    suspend fun updateNaming(
+        id: String,
+        title: String,
+        titleKey: String,
+        titleCompact: String,
+        titleInitials: String,
+        artist: String?,
+        artistKey: String?,
+        artistCompact: String?,
+        swapped: Boolean,
+    )
+
     @Query("UPDATE songs SET favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: String, favorite: Boolean)
 
@@ -136,5 +160,6 @@ interface SongDao {
         val favorite: Boolean,
         val durationMs: Long,
         val addedAt: Long,
+        val swapped: Boolean,
     )
 }

@@ -45,6 +45,25 @@ class LibraryRepository(
 
     suspend fun markPlayed(id: String) = dao.markPlayed(id, System.currentTimeMillis())
     suspend fun setFavorite(id: String, favorite: Boolean) = dao.setFavorite(id, favorite)
+
+    /** Swaps a song's title and artist when the filename put them the other way round. */
+    suspend fun swapTitleAndArtist(song: SongEntity) {
+        val newTitle = song.artist?.takeIf { it.isNotBlank() } ?: return
+        val newArtist = song.title
+        val titleKey = TextNormalizer.key(newTitle)
+        val artistKey = TextNormalizer.key(newArtist)
+        dao.updateNaming(
+            id = song.id,
+            title = newTitle,
+            titleKey = titleKey,
+            titleCompact = titleKey.replace(" ", ""),
+            titleInitials = TextNormalizer.initials(newTitle),
+            artist = newArtist,
+            artistKey = artistKey,
+            artistCompact = artistKey.replace(" ", ""),
+            swapped = !song.swapped,
+        )
+    }
     suspend fun rememberDuration(id: String, durationMs: Long) {
         if (durationMs > 0L) dao.setDurationIfUnknown(id, durationMs)
     }

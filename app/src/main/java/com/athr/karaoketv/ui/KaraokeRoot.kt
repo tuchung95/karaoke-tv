@@ -306,6 +306,7 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
             onQueue = { player.enqueue(sheetSong) },
             onQueueNext = { player.enqueueNext(sheetSong) },
             onToggleFavorite = { vm.toggleFavorite(sheetSong) },
+            onSwapTitleArtist = { vm.swapTitleAndArtist(sheetSong) },
         )
     }
 }

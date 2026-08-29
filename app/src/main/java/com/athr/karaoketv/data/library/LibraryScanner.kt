@@ -176,9 +176,15 @@ class LibraryScanner(
     ): SongEntity {
         val segments = raw.relPath.split('/').filter { it.isNotBlank() }
         val parsed = FilenameParser.parse(raw.fileName, parentFolder = segments.lastOrNull())
-        val title = parsed.title.ifBlank { raw.fileName.substringBeforeLast('.', raw.fileName) }
+        // A correction the viewer made by hand outranks whatever the filename says.
+        val corrected = if (prior?.swapped == true && parsed.artist != null) {
+            parsed.copy(title = parsed.artist, artist = parsed.title)
+        } else {
+            parsed
+        }
+        val title = corrected.title.ifBlank { raw.fileName.substringBeforeLast('.', raw.fileName) }
         val titleKey = TextNormalizer.key(title)
-        val artistKey = parsed.artist?.let { TextNormalizer.key(it) }
+        val artistKey = corrected.artist?.let { TextNormalizer.key(it) }
 
         return SongEntity(
             id = idFor(raw),
@@ -188,11 +194,11 @@ class LibraryScanner(
             titleKey = titleKey,
             titleCompact = titleKey.replace(" ", ""),
             titleInitials = TextNormalizer.initials(title),
-            artist = parsed.artist,
+            artist = corrected.artist,
             artistKey = artistKey,
             artistCompact = artistKey?.replace(" ", ""),
-            songNumber = parsed.songNumber,
-            tone = parsed.tone,
+            songNumber = corrected.songNumber,
+            tone = corrected.tone,
             relPath = raw.relPath,
             category = segments.firstOrNull(),
             collection = segments.lastOrNull(),
@@ -202,6 +208,7 @@ class LibraryScanner(
             playCount = prior?.playCount ?: 0,
             lastPlayedAt = prior?.lastPlayedAt ?: 0L,
             favorite = prior?.favorite ?: false,
+            swapped = prior?.swapped ?: false,
             addedAt = prior?.addedAt?.takeIf { it > 0L } ?: stamp,
             scanStamp = stamp,
         )

@@ -29,6 +29,10 @@ cần chuột hay cảm ứng.
 - **Duyệt theo thư mục / thể loại / ca sĩ**, lấy từ cấu trúc thư mục trên ổ cứng và
   từ tên file.
 
+Khi máy đoán ngược tên bài và ca sĩ — chuyện khó tránh vì file karaoke Việt dùng cả
+"Tên bài - Ca sĩ" lẫn "Ca sĩ - Tên bài" — giữ OK trên bài hát rồi chọn
+**"Đổi tên bài ↔ ca sĩ"**. Sửa một lần, giữ nguyên qua các lần quét lại.
+
 Tên file được bóc tách tự động: mã số, tên bài, ca sĩ, tone nam/nữ; các chữ rác như
 `Karaoke`, `Beat chuẩn`, `HD`, `1080p`, `[MTV]` bị loại khỏi tên hiển thị và khỏi chỉ mục.
 
@@ -110,6 +114,11 @@ dụng cho file trên ổ cứng.
 Cài đặt → **Phiên bản** → Kiểm tra → Tải về → Cài đặt. App đọc bản phát hành mới
 nhất trên GitHub Releases, tải APK rồi giao cho trình cài đặt của hệ thống. Lần đầu
 box sẽ hỏi cấp quyền cài đặt cho app; bật xong quay lại bấm Cài đặt lần nữa.
+
+APK tải về nằm ở `Download/` chứ không phải thư mục riêng của app, vì không phải
+box nào cũng có trình cài đặt APK — emulator Android TV thì không có activity nào
+nhận intent đó, và `startActivity` vẫn không báo lỗi khi không ai nhận. Khi gặp
+trường hợp đó app nói thẳng đường dẫn để bạn mở bằng trình quản lý file.
 
 Phía người phát hành:
 

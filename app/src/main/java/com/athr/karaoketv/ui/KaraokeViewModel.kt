@@ -31,7 +31,14 @@ sealed interface UpdateState {
     data object UpToDate : UpdateState
     data class Available(val release: UpdateChecker.Release) : UpdateState
     data class Downloading(val percent: Int) : UpdateState
-    data class Ready(val apk: java.io.File, val versionName: String) : UpdateState
+    data class Ready(
+        val apk: java.io.File,
+        val versionName: String,
+        /** Set when the APK landed somewhere a file manager can reach it. */
+        val userVisiblePath: String?,
+    ) : UpdateState
+    /** Downloaded, but this box has no installer UI to hand it to. */
+    data class InstallManually(val path: String) : UpdateState
     data class Failed(val message: String) : UpdateState
 }
 
@@ -176,6 +183,10 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
 
     // ---- song actions ------------------------------------------------------
 
+    fun swapTitleAndArtist(song: SongEntity) {
+        viewModelScope.launch { repo.swapTitleAndArtist(song) }
+    }
+
     fun toggleFavorite(song: SongEntity) {
         viewModelScope.launch { repo.setFavorite(song.id, !song.favorite) }
     }
@@ -216,10 +227,18 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
         updateJob = viewModelScope.launch {
             _updateState.value = UpdateState.Downloading(0)
             _updateState.value = try {
-                val apk = ApkInstaller.download(context, available.release.apkUrl) { percent ->
+                val result = ApkInstaller.download(
+                    context = context,
+                    url = available.release.apkUrl,
+                    versionName = available.release.versionName,
+                ) { percent ->
                     _updateState.value = UpdateState.Downloading(percent)
                 }
-                UpdateState.Ready(apk, available.release.versionName)
+                UpdateState.Ready(
+                    apk = result.file,
+                    versionName = available.release.versionName,
+                    userVisiblePath = result.userVisiblePath,
+                )
             } catch (e: Exception) {
                 UpdateState.Failed("Tải bản cập nhật thất bại")
             }
@@ -243,9 +262,13 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
             }
             return
         }
-        if (!ApkInstaller.install(context, ready.apk)) {
-            _updateState.value = UpdateState.Failed("Không mở được trình cài đặt")
-        }
+        if (ApkInstaller.install(context, ready.apk)) return
+
+        // No installer activity on this box. The APK is still on disk, so say
+        // where it is rather than leaving the viewer pressing a dead button.
+        _updateState.value = ready.userVisiblePath
+            ?.let { UpdateState.InstallManually(it) }
+            ?: UpdateState.Failed("Máy không có trình cài đặt APK")
     }
 
     fun shuffleIntoQueue(count: Int = 10) {

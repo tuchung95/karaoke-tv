@@ -2,4 +2,7 @@
 <paths>
     <!-- The downloaded release APK, handed to the system installer. -->
     <cache-path name="updates" path="." />
+    <!-- Downloads folder, so a file manager can open the APK when the box has no
+         installer activity of its own. -->
+    <external-path name="downloads" path="Download/" />
 </paths>

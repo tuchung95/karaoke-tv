@@ -152,7 +152,8 @@ fun SettingsScreen(
                 description = updateDescription(updateState),
                 value = updateAction(updateState),
                 highlighted = updateState is UpdateState.Available ||
-                    updateState is UpdateState.Ready,
+                    updateState is UpdateState.Ready ||
+                    updateState is UpdateState.InstallManually,
                 onClick = onUpdateAction,
             )
         }
@@ -181,6 +182,8 @@ private fun updateDescription(state: UpdateState): String = when (state) {
                 .orEmpty()
     is UpdateState.Downloading -> "Đang tải… ${state.percent}%"
     is UpdateState.Ready -> "Đã tải bản ${state.versionName}, bấm để cài"
+    is UpdateState.InstallManually ->
+        "Máy không có trình cài đặt. Mở file này bằng trình quản lý file: ${state.path}"
     is UpdateState.Failed -> state.message
 }
 
@@ -191,6 +194,7 @@ private fun updateAction(state: UpdateState): String = when (state) {
     is UpdateState.Available -> "Tải về"
     is UpdateState.Downloading -> "${state.percent}%"
     is UpdateState.Ready -> "Cài đặt"
+    is UpdateState.InstallManually -> "Xem đường dẫn"
     is UpdateState.Failed -> "Thử lại"
 }
 

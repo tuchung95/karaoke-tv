@@ -40,6 +40,14 @@
         <package android:name="com.google.android.youtube.tvunplugged" />
         <package android:name="com.google.android.apps.youtube.unplugged" />
         <package android:name="com.google.android.youtube" />
+        <!-- And for the installer we hand update APKs to. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/vnd.android.package-archive" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.INSTALL_PACKAGE" />
+        </intent>
     </queries>
 
     <application
