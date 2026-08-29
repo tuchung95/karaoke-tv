@@ -86,6 +86,25 @@ nằm trong `keystore.properties`. Cả hai đều đã bị `.gitignore` loại
 key cũ; mất key thì phải gỡ app rồi cài lại từ đầu, và mất hết bài yêu thích cùng
 lịch sử hát.
 
+## Thử trên máy Mac trước, không cần box
+
+```bash
+./tools/run-emulator.sh                    # 5 clip mẫu tên tiếng Việt
+./tools/run-emulator.sh ~/Music/Karaoke    # hoặc nạp thư mục của bạn
+```
+
+Script lo hết: tạo máy ảo Android TV nếu chưa có, boot, build, cài, cấp sẵn
+quyền đọc ổ (trên box thật bước này bạn bấm trong app), nạp nhạc rồi mở app.
+
+Trong cửa sổ emulator: **mũi tên = D-pad, Enter = OK, Esc = BACK**. Giữ Enter
+khoảng một giây trên bài hát để mở thêm lựa chọn.
+
+Máy ảo dựng sẵn ổ trong chứ không có cổng USB, nên nó kiểm được giao diện, tìm
+kiếm, bóc tách tên file, hàng chờ, chỉnh tông và điều hướng remote — nhưng không
+thay được việc cắm ổ cứng thật vào box.
+
+Tắt máy ảo: `~/Library/Android/sdk/platform-tools/adb emu kill`
+
 ## Cài lên TV box (không cần adb)
 
 1. Chép `app-release.apk` vào USB, hoặc tải về box qua trình duyệt / Send Files to TV.
