@@ -37,7 +37,7 @@ import com.athr.karaoketv.ui.player.ControlBar
 import com.athr.karaoketv.ui.components.LocalUiSounds
 import com.athr.karaoketv.ui.components.rememberUiSounds
 import com.athr.karaoketv.ui.setup.UpdateGate
-import com.athr.karaoketv.ui.player.VideoBackButton
+import com.athr.karaoketv.ui.player.VideoTopBar
 import com.athr.karaoketv.ui.player.IdleStage
 import com.athr.karaoketv.ui.player.NowPlayingHud
 import com.athr.karaoketv.ui.player.VideoStage
@@ -294,7 +294,14 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
             exit = slideOutVertically { -it } + fadeOut(),
             modifier = Modifier.align(Alignment.TopStart),
         ) {
-            VideoBackButton(onOpenMenu = { browserVisible = true })
+            VideoTopBar(
+                onOpenMenu = { browserVisible = true },
+                onOpenQueue = {
+                    if (backStack.lastOrNull() != Screen.Queue) push(Screen.Queue)
+                    browserVisible = true
+                },
+                queueSize = queue.size,
+            )
         }
 
         AnimatedVisibility(
@@ -320,7 +327,6 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                     player.selectAudioTrack((currentIndex + 1) % audioTracks.size)
                 },
                 onCycleScale = player::cycleScaleMode,
-                onOpenQueue = { push(Screen.Queue) },
                 firstFocus = controlFocus,
             )
         }

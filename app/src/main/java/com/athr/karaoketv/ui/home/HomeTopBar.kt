@@ -36,6 +36,7 @@ import androidx.tv.material3.IconButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
+import androidx.tv.material3.TabDefaults
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
@@ -94,6 +95,18 @@ fun HomeTopBar(
                     selected = tab == selected,
                     onFocus = {},
                     onClick = { onTab(tab) },
+                    // The pill flips between a dim and a bright fill depending on
+                    // whether the row has focus, so the label has to flip with it:
+                    // light on the dim pill, dark on the bright one. Using one
+                    // colour for both leaves the selected tab unreadable in one
+                    // state or the other.
+                    colors = TabDefaults.pillIndicatorTabColors(
+                        contentColor = KaraokeColors.Muted,
+                        inactiveContentColor = KaraokeColors.Muted,
+                        selectedContentColor = KaraokeColors.OnSurface,
+                        focusedContentColor = KaraokeColors.Background,
+                        focusedSelectedContentColor = KaraokeColors.Background,
+                    ),
                 ) {
                     Text(
                         text = tab.label,

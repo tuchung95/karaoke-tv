@@ -238,19 +238,30 @@ private fun ProgressBar(position: PlaybackPosition) {
  * discoverable to whoever was just handed the remote.
  */
 @Composable
-fun VideoBackButton(
+fun VideoTopBar(
     onOpenMenu: () -> Unit,
+    onOpenQueue: () -> Unit,
+    queueSize: Int,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .background(Brush.verticalGradient(listOf(Color(0xCC000000), Color.Transparent)))
             .padding(horizontal = 58.dp, vertical = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         TvButton(
             text = "Menu",
             onClick = onOpenMenu,
             icon = Icons.AutoMirrored.Filled.ArrowBack,
+        )
+        // Up here rather than at the end of the transport strip: the queue is what
+        // the next singer wants, and it should not sit behind nine other controls.
+        TvButton(
+            text = if (queueSize == 0) "Hàng chờ" else "Hàng chờ ($queueSize)",
+            onClick = onOpenQueue,
+            icon = Icons.AutoMirrored.Filled.QueueMusic,
         )
     }
 }
@@ -271,7 +282,6 @@ fun ControlBar(
     onCycleVocal: () -> Unit,
     onCycleAudioTrack: () -> Unit,
     onCycleScale: () -> Unit,
-    onOpenQueue: () -> Unit,
     firstFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
@@ -307,7 +317,6 @@ fun ControlBar(
         TvButton(vocalMode.label(), onCycleVocal, icon = Icons.Filled.GraphicEq)
         if (hasAudioTrackChoice) TvButton("Kênh tiếng", onCycleAudioTrack)
         TvButton(scaleLabel(scaleMode), onCycleScale)
-        TvButton("Hàng chờ", onOpenQueue, icon = Icons.AutoMirrored.Filled.QueueMusic)
     }
 }
 

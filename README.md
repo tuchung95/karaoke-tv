@@ -179,29 +179,25 @@ nhất không có gì chuyển động trên màn hình. Tắt được trong C�
 
 ## Màu
 
-Theo [hệ màu Android TV](https://developer.android.com/design/ui/tv/guides/styles/color-system):
-dark theme, và **điền đủ cả 29 vai trò** của `ColorScheme`. Bỏ trống không có nghĩa
-là để rỗng — chúng rơi về màu tím mặc định của Material, nên component nào chạm tới
-`tertiaryContainer` hay `surfaceTint` sẽ tự sơn màu của thương hiệu khác.
+Dùng thẳng **bảng màu baseline của Material 3** (dark), không pha thêm: mỗi vai trò
+là một tông Google đã cân sẵn với các tông còn lại.
 
-Tông theo quy ước dark theme của M3 (accent 80, "on" 20, container 30, "on
-container" 90), trừ những màu thương hiệu vốn đã đủ tương phản.
+Theo [hệ màu Android TV](https://developer.android.com/design/ui/tv/guides/styles/color-system),
+`ColorScheme` được điền **đủ cả 29 vai trò**. Bỏ trống không có nghĩa là để rỗng —
+chúng rơi về màu mặc định, nên component nào chạm tới `tertiaryContainer` hay
+`surfaceTint` sẽ tự sơn một màu không thuộc bảng nào.
 
-Đo lại toàn bộ trên nền `#07090D`, mốc WCAG là 4.5:1 cho chữ thường và 3:1 cho
-ranh giới giao diện:
+Đo lại trên nền `#141218`, mốc WCAG 4.5:1 cho chữ thường và 3:1 cho ranh giới:
 
 | Cặp màu | Tỉ lệ |
 |---|---|
-| onSurface | 18.10 |
-| onSurfaceVariant | 7.56 |
-| primary | 6.36 |
-| tertiary | 10.90 |
-| error | 7.18 |
-| onPrimary trên primary | 6.39 |
-
-Phép đo này tìm ra một lỗi: màu viền cũ `#2A3140` chỉ đạt **1.53:1** — gần như vô
-hình. Đã nâng lên `#5A6577` (3.38:1); màu cũ lùi về làm `borderVariant`, chỉ dùng
-cho đường kẻ trang trí chứ không dùng cho cạnh của thành phần bấm được.
+| onSurface | 14.35 |
+| Accent | 10.94 |
+| Primary / Muted | 10.91 |
+| Danger | 10.89 |
+| Success | 10.22 |
+| Divider | 5.87 |
+| OnPrimary trên Primary | 7.71 |
 
 ## Hàng chờ
 

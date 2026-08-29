@@ -7,81 +7,72 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.darkColorScheme
 
 /**
- * Built on Compose for TV's Material design system rather than the phone one, so
- * focus scale, borders, glow and the type scale are Google's TV values rather than
- * numbers picked here. Only the hues are ours.
+ * Material 3's own baseline dark palette, unaltered.
  *
- * Dark by default, as the TV colour guidance asks: a lit-up panel is the only
- * light source in most rooms where this app runs.
+ * Dark by default, as the TV colour guidance asks: a lit panel is the only light
+ * source in most rooms where this runs. The tones are Google's published baseline
+ * rather than a house palette, so every role is one they have already balanced
+ * against the others.
  */
 object KaraokeColors {
-    val Background = Color(0xFF07090D)
-    val Scrim = Color(0xF20A0D12)
-    val Surface = Color(0xFF141922)
-    val SurfaceHigh = Color(0xFF1E2531)
-    val Primary = Color(0xFFFF4D8D)
-    val OnPrimary = Color(0xFF1A0009)
-    val Accent = Color(0xFFFFB020)
-    val OnSurface = Color(0xFFF2F4F8)
-    val Muted = Color(0xFF97A0B0)
+    val Background = Color(0xFF141218)
+    val Scrim = Color(0xF2000000)
 
-    /**
-     * Raised from a near-invisible #2A3140, which measured 1.53:1 against the
-     * background — well under the 3:1 that a UI boundary needs to be seen at all.
-     */
-    val Divider = Color(0xFF5A6577)
+    /** M3 surface containers: cards sit above the page, menus above cards. */
+    val Surface = Color(0xFF211F26)
+    val SurfaceHigh = Color(0xFF2B2930)
 
-    /** Decorative separators only, never a control's edge. */
-    val DividerSubtle = Color(0xFF2A3140)
-    val Success = Color(0xFF4ADE80)
-    val Danger = Color(0xFFFF6B6B)
+    val Primary = Color(0xFFD0BCFF)
+    val OnPrimary = Color(0xFF381E72)
+    val Accent = Color(0xFFEFB8C8)
+    val OnSurface = Color(0xFFE6E0E9)
+    val Muted = Color(0xFFCAC4D0)
+
+    /** M3 `outline`: the tone meant for a control's edge. */
+    val Divider = Color(0xFF938F99)
+
+    /** M3 `outlineVariant`: decorative separators only. */
+    val DividerSubtle = Color(0xFF49454F)
+
+    val Success = Color(0xFF6DD58C)
+    val Danger = Color(0xFFF2B8B5)
 }
 
-/**
- * Every one of the scheme's roles, not just the handful the screens name directly.
- *
- * Leaving the rest unset does not leave them empty: they fall back to Material's
- * baseline purple, so any component reaching for `tertiaryContainer` or
- * `surfaceTint` would quietly paint itself a colour from another app's brand.
- * Tones follow the Material 3 dark-theme convention — accent at 80, its "on" at
- * 20, container at 30, that container's "on" at 90 — except where a brand colour
- * already clears the contrast bar on its own.
- */
+/** Every one of the scheme's 29 roles, straight from the M3 baseline dark palette. */
 private val TvColorScheme = darkColorScheme(
-    primary = KaraokeColors.Primary,
-    onPrimary = KaraokeColors.OnPrimary,
-    primaryContainer = Color(0xFF950434),
-    onPrimaryContainer = Color(0xFFFECDDD),
-    inversePrimary = Color(0xFFC70546),
+    primary = Color(0xFFD0BCFF),
+    onPrimary = Color(0xFF381E72),
+    primaryContainer = Color(0xFF4F378B),
+    onPrimaryContainer = Color(0xFFEADDFF),
+    inversePrimary = Color(0xFF6750A4),
 
-    secondary = Color(0xFFDBBDC7),
-    onSecondary = Color(0xFF42242E),
-    secondaryContainer = Color(0xFF633645),
-    onSecondaryContainer = Color(0xFFEDDEE3),
+    secondary = Color(0xFFCCC2DC),
+    onSecondary = Color(0xFF332D41),
+    secondaryContainer = Color(0xFF4A4458),
+    onSecondaryContainer = Color(0xFFE8DEF8),
 
-    tertiary = KaraokeColors.Accent,
-    onTertiary = Color(0xFF201400),
-    tertiaryContainer = Color(0xFF956504),
-    onTertiaryContainer = Color(0xFFFEEECD),
+    tertiary = Color(0xFFEFB8C8),
+    onTertiary = Color(0xFF492532),
+    tertiaryContainer = Color(0xFF633B48),
+    onTertiaryContainer = Color(0xFFFFD8E4),
 
-    background = KaraokeColors.Background,
-    onBackground = KaraokeColors.OnSurface,
-    surface = KaraokeColors.Surface,
-    onSurface = KaraokeColors.OnSurface,
-    surfaceVariant = KaraokeColors.SurfaceHigh,
-    onSurfaceVariant = KaraokeColors.Muted,
-    surfaceTint = KaraokeColors.Primary,
-    inverseSurface = KaraokeColors.OnSurface,
-    inverseOnSurface = Color(0xFF2E3138),
+    background = Color(0xFF141218),
+    onBackground = Color(0xFFE6E0E9),
+    surface = Color(0xFF141218),
+    onSurface = Color(0xFFE6E0E9),
+    surfaceVariant = Color(0xFF49454F),
+    onSurfaceVariant = Color(0xFFCAC4D0),
+    surfaceTint = Color(0xFFD0BCFF),
+    inverseSurface = Color(0xFFE6E0E9),
+    inverseOnSurface = Color(0xFF322F35),
 
-    error = KaraokeColors.Danger,
-    onError = Color(0xFF5C110A),
-    errorContainer = Color(0xFF8A190F),
-    onErrorContainer = Color(0xFFFAD4D1),
+    error = Color(0xFFF2B8B5),
+    onError = Color(0xFF601410),
+    errorContainer = Color(0xFF8C1D18),
+    onErrorContainer = Color(0xFFF9DEDC),
 
-    border = KaraokeColors.Divider,
-    borderVariant = KaraokeColors.DividerSubtle,
-    // Material puts the scrim at pure black and varies only its alpha.
+    border = Color(0xFF938F99),
+    borderVariant = Color(0xFF49454F),
     scrim = Color(0xFF000000),
 )
 
