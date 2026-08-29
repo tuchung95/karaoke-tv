@@ -1,0 +1,20 @@
+package com.athr.karaoketv.ui
+
+/** Where a song list came from, so the list screen can load and title itself. */
+sealed interface SongListSource {
+    data class Category(val name: String) : SongListSource
+    data class Artist(val name: String) : SongListSource
+    data object Favorites : SongListSource
+    data object MostPlayed : SongListSource
+    data object All : SongListSource
+}
+
+sealed interface Screen {
+    data object Home : Screen
+    data object Search : Screen
+    data object Categories : Screen
+    data object Artists : Screen
+    data object Queue : Screen
+    data object Settings : Screen
+    data class SongList(val title: String, val source: SongListSource) : Screen
+}
