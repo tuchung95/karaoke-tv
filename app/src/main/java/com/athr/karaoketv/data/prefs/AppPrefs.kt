@@ -76,6 +76,11 @@ class AppPrefs(context: Context) {
             .toSet()
         set(value) = sp.edit { putStringSet(KEY_SHELF_HIDDEN, value.map { it.key }.toSet()) }
 
+    /** Focus clicks and the voice-search tones. */
+    var uiSounds: Boolean
+        get() = sp.getBoolean(KEY_UI_SOUNDS, true)
+        set(value) = sp.edit { putBoolean(KEY_UI_SOUNDS, value) }
+
     fun setShelfVisible(shelf: HomeShelf, visible: Boolean) {
         hiddenShelves = if (visible) hiddenShelves - shelf else hiddenShelves + shelf
     }
@@ -124,5 +129,6 @@ class AppPrefs(context: Context) {
         private const val KEY_YT_KEYWORD = "youtube_append_karaoke"
         private const val KEY_SHELF_ORDER = "home_shelf_order"
         private const val KEY_SHELF_HIDDEN = "home_shelf_hidden"
+        private const val KEY_UI_SOUNDS = "ui_sounds"
     }
 }

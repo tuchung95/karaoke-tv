@@ -90,6 +90,14 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
 
     val currentVersion: String = BuildConfig.VERSION_NAME
 
+    private val _uiSounds = MutableStateFlow(prefs.uiSounds)
+    val uiSounds: kotlinx.coroutines.flow.StateFlow<Boolean> = _uiSounds.asStateFlow()
+
+    fun toggleUiSounds() {
+        prefs.uiSounds = !prefs.uiSounds
+        _uiSounds.value = prefs.uiSounds
+    }
+
     data class HomeLayout(
         val order: List<HomeShelf>,
         val hidden: Set<HomeShelf>,

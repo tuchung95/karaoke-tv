@@ -15,6 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.athr.karaoketv.ui.components.LocalUiSounds
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +46,7 @@ fun rememberVoiceSearch(
     val currentOnResult by rememberUpdatedState(onResult)
 
     val available = remember { SpeechRecognizer.isRecognitionAvailable(context) }
+    val sounds = LocalUiSounds.current
     var listening by remember { mutableStateOf(false) }
     var partial by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
@@ -65,6 +67,9 @@ fun rememberVoiceSearch(
             override fun onReadyForSpeech(params: Bundle?) {
                 listening = true
                 error = null
+                // The one action with no moving part on screen: without a tone
+                // nobody can tell the box is listening or the mic is dead.
+                sounds.listenStart()
             }
 
             override fun onBeginningOfSpeech() = Unit
@@ -77,10 +82,12 @@ fun rememberVoiceSearch(
             override fun onError(code: Int) {
                 listening = false
                 error = describeError(code)
+                sounds.listenFailed()
             }
 
             override fun onResults(results: Bundle?) {
                 listening = false
+                sounds.listenDone()
                 val best = results
                     ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.firstOrNull()

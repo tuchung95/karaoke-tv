@@ -224,6 +224,7 @@ private fun SettingsRoute(
     val scanState by vm.scanState.collectAsStateWithLifecycle()
     val scaleMode by vm.player.scaleMode.collectAsStateWithLifecycle()
     val updateState by vm.updateState.collectAsStateWithLifecycle()
+    val soundsOn by vm.uiSounds.collectAsStateWithLifecycle()
     val pitch by vm.player.pitchSemitones.collectAsStateWithLifecycle()
     var autoNext by remember { mutableStateOf(vm.prefs.autoNext) }
     var nextUpBanner by remember { mutableStateOf(vm.prefs.showNextUpBanner) }
@@ -239,6 +240,8 @@ private fun SettingsRoute(
         nextUpBanner = nextUpBanner,
         appendKaraokeToYouTube = youTubeKeyword,
         youTubeAvailable = youTubeAvailable,
+        uiSounds = soundsOn,
+        onToggleUiSounds = vm::toggleUiSounds,
         currentVersion = vm.currentVersion,
         updateState = updateState,
         scaleModeLabel = when (scaleMode) {

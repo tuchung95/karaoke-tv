@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.setValue
@@ -33,6 +34,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.ui.components.SongActionSheet
 import com.athr.karaoketv.ui.player.ControlBar
+import com.athr.karaoketv.ui.components.LocalUiSounds
+import com.athr.karaoketv.ui.components.rememberUiSounds
 import com.athr.karaoketv.ui.setup.UpdateGate
 import com.athr.karaoketv.ui.player.VideoBackButton
 import com.athr.karaoketv.ui.player.IdleStage
@@ -51,6 +54,14 @@ private const val SEEK_STEP_MS = 10_000L
  */
 @Composable
 fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
+    val soundsOn by vm.uiSounds.collectAsStateWithLifecycle()
+    CompositionLocalProvider(LocalUiSounds provides rememberUiSounds(soundsOn)) {
+        KaraokeRootContent(vm, onExit)
+    }
+}
+
+@Composable
+private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
     val songCount by vm.songCount.collectAsStateWithLifecycle()
     val scanState by vm.scanState.collectAsStateWithLifecycle()
 
@@ -241,7 +252,12 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                                 hudVisible = true
                                 true
                             }
+                            // Up goes straight to the queue: mid-party that is
+                            // the thing people reach for, not the home screen.
                             KeyEvent.KEYCODE_DPAD_UP -> {
+                                if (backStack.lastOrNull() != Screen.Queue) {
+                                    push(Screen.Queue)
+                                }
                                 browserVisible = true
                                 true
                             }

@@ -110,7 +110,7 @@ fun SongRow(
 ) {
     ListItem(
         selected = false,
-        onClick = onClick,
+        onClick = withSelectSound(onClick),
         onLongClick = onLongClick,
         modifier = modifier
             .fillMaxWidth()

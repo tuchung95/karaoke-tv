@@ -58,10 +58,10 @@ fun TvButton(
         )
     }
     Button(
-        onClick = onClick,
-        modifier = modifier.then(
-            focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier
-        ),
+        onClick = withSelectSound(onClick),
+        modifier = modifier
+            .navigationSound()
+            .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         colors = colors,
     ) {
         if (icon != null) {
@@ -87,11 +87,11 @@ fun TvCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        onClick = onClick,
+        onClick = withSelectSound(onClick),
         onLongClick = onLongClick,
-        modifier = modifier.then(
-            focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier
-        ),
+        modifier = modifier
+            .navigationSound()
+            .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         colors = CardDefaults.colors(
             containerColor = KaraokeColors.Surface,
             contentColor = KaraokeColors.OnSurface,

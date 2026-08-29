@@ -26,6 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.athr.karaoketv.ui.components.withSelectSound
+import com.athr.karaoketv.ui.components.navigationSound
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,6 +64,8 @@ fun SettingsScreen(
     pitchSemitones: Int,
     onChangeLibrary: () -> Unit,
     onRescan: () -> Unit,
+    uiSounds: Boolean,
+    onToggleUiSounds: () -> Unit,
     onToggleAutoNext: () -> Unit,
     onToggleNextUpBanner: () -> Unit,
     onToggleYouTubeKeyword: () -> Unit,
@@ -93,7 +97,7 @@ fun SettingsScreen(
                     if (entry == SettingsSection.YOUTUBE && !youTubeAvailable) return@forEach
                     NavigationDrawerItem(
                         selected = entry == section,
-                        onClick = { section = entry },
+                        onClick = withSelectSound({ section = entry }),
                         leadingContent = {
                             Icon(entry.icon, contentDescription = null)
                         },
@@ -176,6 +180,17 @@ fun SettingsScreen(
                     }
 
                     SettingsSection.PLAYBACK -> {
+                        item {
+                            SettingRow(
+                                title = "Âm thanh điều hướng",
+                                description = "Tiếng lách cách khi di chuyển và chọn, " +
+                                    "và tiếng báo khi tìm bằng giọng nói",
+                                value = if (uiSounds) "Bật" else "Tắt",
+                                highlighted = uiSounds,
+                                checked = uiSounds,
+                                onClick = onToggleUiSounds,
+                            )
+                        }
                         item {
                             SettingRow(
                                 title = "Tự động hát bài kế",
@@ -325,8 +340,8 @@ private fun SettingRow(
 ) {
     ListItem(
         selected = false,
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        onClick = withSelectSound(onClick),
+        modifier = Modifier.fillMaxWidth().navigationSound(),
         colors = karaokeListItemColors(),
         scale = fullWidthRowScale(),
         headlineContent = {

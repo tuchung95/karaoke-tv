@@ -23,6 +23,8 @@ import androidx.tv.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.athr.karaoketv.ui.components.withSelectSound
+import com.athr.karaoketv.ui.components.navigationSound
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.prefs.HomeShelf
 import com.athr.karaoketv.ui.components.TvButton
@@ -88,7 +90,7 @@ fun HomeLayoutScreen(
                 ) {
                     ListItem(
                         selected = false,
-                        onClick = { onToggle(shelf) },
+                        onClick = withSelectSound({ onToggle(shelf) }),
                         modifier = Modifier.weight(1f),
                         colors = karaokeListItemColors(),
                         leadingContent = {

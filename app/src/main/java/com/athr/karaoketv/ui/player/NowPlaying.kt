@@ -123,7 +123,7 @@ fun NowPlayingHud(
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "▲ Menu   ▼ Điều khiển",
+                            text = "▲ Hàng chờ   ▼ Điều khiển",
                             style = MaterialTheme.typography.labelMedium,
                             color = KaraokeColors.Muted,
                         )

@@ -163,6 +163,22 @@ Nút tròn chỉ có icon hiện nhãn khi được focus. Nhãn vẽ bằng `Po
 chỗ trong bố cục — nếu chiếm chỗ thì cả thanh sẽ xê dịch mỗi lần focus nhảy sang nút
 khác.
 
+## Phím khi đang xem video
+
+| Phím | Tác dụng |
+|---|---|
+| ▲ Lên | Mở hàng chờ |
+| ▼ Xuống | Thanh điều khiển |
+| OK | Phát / tạm dừng |
+| ◀ ▶ | Tua 10 giây |
+| BACK | Về menu |
+
+Âm thanh: focus và chọn dùng hiệu ứng có sẵn của hệ thống, nên khớp với mọi app
+khác trên box và tự im khi người dùng tắt âm hệ thống. Tìm bằng giọng nói có tông
+riêng lúc bắt đầu nghe, lúc nhận được kết quả và lúc thất bại — đó là thao tác duy
+nhất không có gì chuyển động trên màn hình, không có tiếng thì không ai biết box
+đang nghe hay micro đã hỏng. Tắt được trong Cài đặt → Phát nhạc.
+
 ## Hàng chờ
 
 Dạng immersive list: bài mà remote đang dừng trên đó phủ kín phía sau, hàng thẻ
