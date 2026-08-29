@@ -67,7 +67,7 @@ fun BrowserContent(
             Box(Modifier.weight(1f)) {
                 when (screen) {
                     Screen.Home ->
-                        HomeRoute(vm, onNavigate, onSongSelected, onSongOptions, onOpenSetup)
+                        HomeRoute(vm, onNavigate, onSongSelected, onSongOptions, onOpenSetup, onWatchVideo)
                     Screen.Search -> SearchRoute(vm, onSongSelected, onSongOptions)
                     Screen.Categories -> CategoriesRoute(vm, onNavigate)
                     Screen.Artists -> ArtistsRoute(vm, onNavigate)
@@ -79,7 +79,6 @@ fun BrowserContent(
                 }
             }
         }
-        KeyHints(modifier = Modifier.align(Alignment.BottomEnd))
     }
 }
 
@@ -90,6 +89,7 @@ private fun HomeRoute(
     onSongSelected: (SongEntity) -> Unit,
     onSongOptions: (SongEntity) -> Unit,
     onOpenSetup: () -> Unit,
+    onWatchVideo: (() -> Unit)?,
 ) {
     val songCount by vm.songCount.collectAsStateWithLifecycle()
     val queue by vm.player.queue.collectAsStateWithLifecycle()
@@ -131,6 +131,7 @@ private fun HomeRoute(
             },
             onShuffle = { vm.shuffleIntoQueue() },
             onSettings = { onNavigate(Screen.Settings) },
+            onWatchVideo = onWatchVideo,
             onSongClick = onSongSelected,
             onSongOptions = onSongOptions,
             onCategoryClick = { name ->
@@ -348,22 +349,5 @@ private fun HomeLayoutRoute(vm: KaraokeViewModel) {
     )
 }
 
-@Composable
-private fun KeyHints(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color(0x99000000))
-            .padding(horizontal = 58.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        Text(
-            text = "BACK: quay lại · Giữ OK trên bài hát: thêm lựa chọn · " +
-                "BACK ở màn hình chính: ẩn menu để xem video",
-            style = MaterialTheme.typography.labelMedium,
-            color = KaraokeColors.Muted,
-        )
-    }
-}
 
 private const val PAGE_SIZE = 300

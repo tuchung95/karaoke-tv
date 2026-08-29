@@ -67,6 +67,7 @@ data class HomeActions(
     val onFavorites: () -> Unit,
     val onShuffle: () -> Unit,
     val onSettings: () -> Unit,
+    val onWatchVideo: (() -> Unit)?,
     val onSongClick: (SongEntity) -> Unit,
     val onSongOptions: (SongEntity) -> Unit,
     val onCategoryClick: (String) -> Unit,
@@ -101,11 +102,6 @@ fun HomeScreen(
         item {
             HomeTopBar(
                 selected = HomeTab.HOME,
-                summary = if (songCount > 0) {
-                    "${formatCount(songCount)} bài · $libraryLabel"
-                } else {
-                    "Chưa quét được bài nào"
-                },
                 onSearch = actions.onSearch,
                 onTab = { tab ->
                     when (tab) {
@@ -132,6 +128,8 @@ fun HomeScreen(
                     ?: shelves.recentlyAdded.firstOrNull()
                     ?: playing,
                 nowPlaying = nowPlaying != null,
+                onWatchVideo = actions.onWatchVideo,
+                onPlaySong = actions.onSongClick,
             )
         }
 

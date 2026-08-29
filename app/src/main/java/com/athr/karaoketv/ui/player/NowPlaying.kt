@@ -232,6 +232,29 @@ private fun ProgressBar(position: PlaybackPosition) {
     }
 }
 
+/**
+ * A visible way back to the library, sitting top-left over the video where a back
+ * control belongs. BACK and the up key both do this too, but neither is
+ * discoverable to whoever was just handed the remote.
+ */
+@Composable
+fun VideoBackButton(
+    onOpenMenu: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .background(Brush.verticalGradient(listOf(Color(0xCC000000), Color.Transparent)))
+            .padding(horizontal = 58.dp, vertical = 24.dp),
+    ) {
+        TvButton(
+            text = "Menu",
+            onClick = onOpenMenu,
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
+        )
+    }
+}
+
 /** The transport strip that drops in over the video when someone presses OK. */
 @Composable
 fun ControlBar(
@@ -249,7 +272,6 @@ fun ControlBar(
     onCycleAudioTrack: () -> Unit,
     onCycleScale: () -> Unit,
     onOpenQueue: () -> Unit,
-    onOpenMenu: () -> Unit,
     firstFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
@@ -265,13 +287,6 @@ fun ControlBar(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // A visible way back to the library. BACK and the up key both do this too,
-        // but neither is discoverable to whoever was just handed the remote.
-        TvButton(
-            text = "Menu",
-            onClick = onOpenMenu,
-            icon = Icons.AutoMirrored.Filled.ArrowBack,
-        )
         TvButton(
             text = if (isPlaying) "Tạm dừng" else "Phát",
             icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,

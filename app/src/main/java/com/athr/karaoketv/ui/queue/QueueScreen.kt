@@ -1,20 +1,23 @@
 package com.athr.karaoketv.ui.queue
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -29,30 +32,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.DrawerValue
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.NavigationDrawer
-import androidx.tv.material3.NavigationDrawerItem
 import androidx.tv.material3.Text
 import com.athr.karaoketv.player.QueueItem
 import com.athr.karaoketv.ui.components.Pill
+import com.athr.karaoketv.ui.components.SongCard
 import com.athr.karaoketv.ui.components.SongThumbnail
 import com.athr.karaoketv.ui.components.TvButton
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 
 /**
- * Queue on the left in a navigation drawer, the picked song and everything you can
- * do to it on the right.
+ * The queue as an immersive list: whatever the remote is resting on fills the
+ * screen behind, and the entries run along the bottom.
  *
- * The drawer is Google's component for app destinations and their guidance caps it
- * at five or six; a karaoke queue has no such ceiling, so it scrolls. What the
- * shape buys is worth that: entries collapse to thumbnails until focus reaches
- * them, and the five actions live once in the content pane instead of being
- * repeated on every single row, which is what made this screen a wall of buttons.
+ * This is the pattern Google documents for "move through a row, see the selection
+ * in full" — and the right fit here, where the previous two attempts were not. A
+ * button per action per row made a wall of controls; a navigation drawer is meant
+ * for an app's three-to-seven destinations, not an unbounded queue.
  */
 @Composable
 fun QueueScreen(
@@ -67,186 +69,188 @@ fun QueueScreen(
     onSkipCurrent: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedUid by remember { mutableStateOf<Long?>(null) }
-    val selected = queue.firstOrNull { it.uid == selectedUid } ?: queue.firstOrNull()
-    val selectedIndex = queue.indexOfFirst { it.uid == selected?.uid }
+    var focusedUid by remember { mutableStateOf<Long?>(null) }
+    val focused = queue.firstOrNull { it.uid == focusedUid } ?: queue.firstOrNull()
+    val focusedIndex = queue.indexOfFirst { it.uid == focused?.uid }
 
-    NavigationDrawer(
-        modifier = modifier.fillMaxSize(),
-        drawerContent = { drawerValue ->
-            val expanded = drawerValue == DrawerValue.Open
+    Box(modifier = modifier.fillMaxSize()) {
+        // Backdrop: the entry under the remote, swapped without a jump cut.
+        AnimatedContent(
+            targetState = focused?.song?.uri,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "queue-backdrop",
+        ) { uri ->
+            if (uri != null) {
+                SongThumbnail(
+                    uri = uri,
+                    iconSize = 96,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 420.dp),
+                )
+            }
+        }
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        0f to KaraokeColors.Background,
+                        0.4f to KaraokeColors.Background,
+                        0.85f to KaraokeColors.Background.copy(alpha = 0.65f),
+                        1f to Color.Transparent,
+                    )
+                )
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        0.35f to Color.Transparent,
+                        1f to KaraokeColors.Background,
+                    )
+                )
+        )
+
+        Column(Modifier.fillMaxSize()) {
             Column(
                 Modifier
-                    .fillMaxHeight()
-                    .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                    .weight(1f)
+                    .padding(
+                        start = TvSpacing.ScreenHorizontal,
+                        end = TvSpacing.ScreenHorizontal,
+                        top = 4.dp,
+                    ),
+                verticalArrangement = Arrangement.Center,
             ) {
-                if (expanded) {
-                    Text(
-                        text = "Hàng chờ · ${queue.size} bài",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = KaraokeColors.Muted,
-                        modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
-                    )
-                }
-                queue.forEachIndexed { index, item ->
-                    NavigationDrawerItem(
-                        selected = item.uid == selected?.uid,
-                        onClick = { selectedUid = item.uid },
-                        onLongClick = { onPlayNow(item) },
-                        leadingContent = {
-                            Box(contentAlignment = Alignment.Center) {
-                                SongThumbnail(
-                                    uri = item.song.uri,
-                                    iconSize = 14,
-                                    modifier = Modifier
-                                        .size(width = 40.dp, height = 40.dp)
-                                        .clip(RoundedCornerShape(6.dp)),
-                                )
-                                Text(
-                                    text = "${index + 1}",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = KaraokeColors.OnSurface,
-                                )
-                            }
-                        },
-                        supportingContent = {
-                            Text(
-                                text = item.song.artist ?: item.song.collection ?: "—",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    ) {
+                if (current != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Pill("ĐANG HÁT", color = KaraokeColors.Success)
+                        Spacer(Modifier.width(12.dp))
                         Text(
-                            text = item.song.title,
+                            text = current.song.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = KaraokeColors.Muted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.width(560.dp),
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        TvButton("Bỏ qua", onSkipCurrent, icon = Icons.Filled.SkipNext)
+                    }
+                    Spacer(Modifier.height(20.dp))
+                }
+
+                if (focused == null) {
+                    Text(
+                        text = "Hàng chờ trống",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = KaraokeColors.OnSurface,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Chọn một bài rồi bấm OK để thêm vào đây.",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = KaraokeColors.Muted,
+                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Pill("Thứ ${focusedIndex + 1} / ${queue.size}")
+                        if (focused.song.songNumber != null) {
+                            Spacer(Modifier.width(8.dp))
+                            Pill(focused.song.songNumber)
+                        }
+                        if (focused.song.tone != null) {
+                            Spacer(Modifier.width(8.dp))
+                            Pill(focused.song.tone, color = KaraokeColors.Primary)
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = focused.song.title,
+                        style = MaterialTheme.typography.displaySmall,
+                        color = KaraokeColors.OnSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    val singer = focused.song.artist
+                    if (!singer.isNullOrBlank()) {
+                        Text(
+                            text = singer,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = KaraokeColors.Muted,
+                            maxLines = 1,
+                        )
+                    }
+                    Spacer(Modifier.height(18.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        TvButton(
+                            text = "Hát ngay",
+                            onClick = { onPlayNow(focused) },
+                            icon = Icons.Filled.PlayArrow,
+                            emphasised = true,
+                        )
+                        TvButton(
+                            text = "Ưu tiên",
+                            onClick = { onPrioritise(focused) },
+                            icon = Icons.Filled.VerticalAlignTop,
+                        )
+                        if (focusedIndex > 0) {
+                            TvButton(
+                                text = "Lên",
+                                onClick = { onMoveUp(focused) },
+                                icon = Icons.Filled.ArrowUpward,
+                            )
+                        }
+                        if (focusedIndex < queue.lastIndex) {
+                            TvButton(
+                                text = "Xuống",
+                                onClick = { onMoveDown(focused) },
+                                icon = Icons.Filled.ArrowDownward,
+                            )
+                        }
+                        TvButton(
+                            text = "Xóa",
+                            onClick = { onRemove(focused) },
+                            icon = Icons.Filled.Delete,
+                        )
+                        TvButton("Xóa hết", onClearAll, icon = Icons.Filled.Delete)
+                    }
+                }
+            }
+
+            if (queue.isNotEmpty()) {
+                Text(
+                    text = "${queue.size} bài đang chờ",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = KaraokeColors.Muted,
+                    modifier = Modifier.padding(
+                        start = TvSpacing.ScreenHorizontal,
+                        bottom = 8.dp,
+                    ),
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                    contentPadding = PaddingValues(
+                        start = TvSpacing.ScreenHorizontal,
+                        end = TvSpacing.ScreenHorizontal,
+                        bottom = TvSpacing.ScreenVertical,
+                    ),
+                ) {
+                    itemsIndexed(queue, key = { _, item -> item.uid }) { _, item ->
+                        SongCard(
+                            song = item.song,
+                            onClick = { onPlayNow(item) },
+                            onLongClick = { onPrioritise(item) },
+                            modifier = Modifier.onFocusChanged { state ->
+                                if (state.isFocused) focusedUid = item.uid
+                            },
                         )
                     }
                 }
             }
-        },
-    ) {
-        QueueDetail(
-            current = current,
-            selected = selected,
-            position = if (selectedIndex >= 0) selectedIndex + 1 else 0,
-            total = queue.size,
-            canMoveUp = selectedIndex > 0,
-            canMoveDown = selectedIndex >= 0 && selectedIndex < queue.lastIndex,
-            onPlayNow = { selected?.let(onPlayNow) },
-            onPrioritise = { selected?.let(onPrioritise) },
-            onMoveUp = { selected?.let(onMoveUp) },
-            onMoveDown = { selected?.let(onMoveDown) },
-            onRemove = { selected?.let(onRemove) },
-            onClearAll = onClearAll,
-            onSkipCurrent = onSkipCurrent,
-        )
-    }
-}
-
-@Composable
-private fun QueueDetail(
-    current: QueueItem?,
-    selected: QueueItem?,
-    position: Int,
-    total: Int,
-    canMoveUp: Boolean,
-    canMoveDown: Boolean,
-    onPlayNow: () -> Unit,
-    onPrioritise: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
-    onRemove: () -> Unit,
-    onClearAll: () -> Unit,
-    onSkipCurrent: () -> Unit,
-) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(
-                start = 24.dp,
-                end = TvSpacing.ScreenHorizontal,
-                top = 8.dp,
-                bottom = TvSpacing.ScreenVertical,
-            )
-    ) {
-        if (current != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Pill("ĐANG HÁT", color = KaraokeColors.Success)
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = current.song.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = KaraokeColors.OnSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(12.dp))
-                TvButton("Bỏ qua", onSkipCurrent, icon = Icons.Filled.SkipNext)
-            }
-            Spacer(Modifier.height(24.dp))
         }
-
-        if (selected == null) {
-            Text(
-                text = "Chưa có bài nào đang chờ",
-                style = MaterialTheme.typography.headlineMedium,
-                color = KaraokeColors.Muted,
-            )
-            return@Column
-        }
-
-        SongThumbnail(
-            uri = selected.song.uri,
-            iconSize = 48,
-            modifier = Modifier
-                .fillMaxWidth(0.52f)
-                .height(200.dp)
-                .clip(RoundedCornerShape(14.dp)),
-        )
-        Spacer(Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Pill("Thứ $position / $total")
-            if (selected.song.songNumber != null) {
-                Spacer(Modifier.width(8.dp))
-                Pill(selected.song.songNumber)
-            }
-            if (selected.song.tone != null) {
-                Spacer(Modifier.width(8.dp))
-                Pill(selected.song.tone, color = KaraokeColors.Primary)
-            }
-        }
-        Spacer(Modifier.height(10.dp))
-        Text(
-            text = selected.song.title,
-            style = MaterialTheme.typography.headlineLarge,
-            color = KaraokeColors.OnSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        val singer = selected.song.artist
-        if (!singer.isNullOrBlank()) {
-            Text(
-                text = singer,
-                style = MaterialTheme.typography.titleMedium,
-                color = KaraokeColors.Muted,
-                maxLines = 1,
-            )
-        }
-
-        Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            TvButton("Hát ngay", onPlayNow, icon = Icons.Filled.PlayArrow, emphasised = true)
-            TvButton("Ưu tiên", onPrioritise, icon = Icons.Filled.VerticalAlignTop)
-            if (canMoveUp) TvButton("Lên", onMoveUp, icon = Icons.Filled.ArrowUpward)
-            if (canMoveDown) TvButton("Xuống", onMoveDown, icon = Icons.Filled.ArrowDownward)
-            TvButton("Xóa", onRemove, icon = Icons.Filled.Delete)
-        }
-        Spacer(Modifier.height(12.dp))
-        TvButton("Xóa hết hàng chờ", onClearAll, icon = Icons.Filled.Delete)
     }
 }

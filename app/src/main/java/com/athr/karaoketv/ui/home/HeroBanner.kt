@@ -1,6 +1,7 @@
 package com.athr.karaoketv.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,11 +19,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Tv
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.SongThumbnail
+import com.athr.karaoketv.ui.components.TvButton
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
 
@@ -38,6 +43,8 @@ import com.athr.karaoketv.ui.theme.TvSpacing
 fun HeroBanner(
     song: SongEntity?,
     nowPlaying: Boolean,
+    onWatchVideo: (() -> Unit)?,
+    onPlaySong: (SongEntity) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (song == null) return
@@ -117,8 +124,27 @@ fun HeroBanner(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // While something is playing there is always a way back to the
+                // picture; the remote gestures that do it are invisible.
+                if (onWatchVideo != null) {
+                    TvButton(
+                        text = "Xem video",
+                        onClick = onWatchVideo,
+                        icon = Icons.Filled.Tv,
+                        emphasised = true,
+                    )
+                }
+                TvButton(
+                    text = if (nowPlaying) "Hát lại từ đầu" else "Hát bài này",
+                    onClick = { onPlaySong(song) },
+                    icon = Icons.Filled.PlayArrow,
+                    emphasised = onWatchVideo == null,
+                )
+            }
         }
     }
 }
 
-private val HERO_HEIGHT = 260.dp
+private val HERO_HEIGHT = 300.dp

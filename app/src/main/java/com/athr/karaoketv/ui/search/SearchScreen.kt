@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import com.athr.karaoketv.ui.components.SongCard
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -80,51 +85,45 @@ fun SearchScreen(
     ) {
         Column(
             Modifier
-                .width(440.dp)
+                .width(380.dp)
                 .fillMaxHeight()
                 // The nav bar above costs vertical room; scrolling guarantees the
                 // space and delete keys stay reachable on shorter panels.
                 .verticalScroll(rememberScrollState())
         ) {
             QueryDisplay(query = query, listening = voice.listening)
-            Spacer(Modifier.height(16.dp))
-            TvButton(
-                text = when {
-                    voice.listening -> "Đang nghe… nói tên bài"
-                    !voice.available -> "Không hỗ trợ giọng nói"
-                    else -> "Tìm bằng giọng nói"
-                },
-                icon = Icons.Filled.Mic,
-                emphasised = voice.listening,
-                onClick = { if (voice.listening) voice.stop() else voice.start() },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Spacer(Modifier.height(12.dp))
+            // Side by side: stacked, these two pushed the query box off the top of
+            // a 540dp panel.
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                TvButton(
+                    text = when {
+                        voice.listening -> "Đang nghe…"
+                        !voice.available -> "Không hỗ trợ giọng nói"
+                        else -> "Giọng nói"
+                    },
+                    icon = Icons.Filled.Mic,
+                    emphasised = voice.listening,
+                    onClick = { if (voice.listening) voice.stop() else voice.start() },
+                    modifier = Modifier.weight(1f),
+                )
+                if (youTubeAvailable) {
+                    TvButton(
+                        text = "YouTube",
+                        icon = Icons.Filled.PlayCircleOutline,
+                        onClick = onYouTubeSearch,
+                    )
+                }
+            }
             if (voice.error != null) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
                     text = voice.error!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = KaraokeColors.Danger,
                 )
             }
-            if (youTubeAvailable) {
-                Spacer(Modifier.height(12.dp))
-                TvButton(
-                    text = "Tìm bài này trên YouTube",
-                    icon = Icons.Filled.PlayCircleOutline,
-                    onClick = onYouTubeSearch,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    // The Premium detail lives in Settings; here it would cost the
-                    // keyboard two rows of screen.
-                    text = "Phát bằng app YouTube — không chỉnh tông hay bỏ giọng được.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = KaraokeColors.Muted,
-                )
-            }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(10.dp))
             OnScreenKeyboard(
                 onKey = onKey,
                 onBackspace = onBackspace,
@@ -142,22 +141,31 @@ fun SearchScreen(
                     results.isEmpty() -> "Không tìm thấy bài nào"
                     else -> "${results.size} kết quả"
                 },
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 color = KaraokeColors.OnSurface,
             )
             Spacer(Modifier.height(12.dp))
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Cards, not rows: results are content, and a grid of thumbnails is
+            // quicker to pick from across the room than a column of text.
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(TvSpacing.CardWidth4Up),
+                horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                verticalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                contentPadding = PaddingValues(bottom = 48.dp),
+            ) {
                 items(results, key = { it.id }) { song ->
-                    SongRow(
+                    SongCard(
                         song = song,
                         onClick = { onSongClick(song) },
                         onLongClick = { onSongOptions(song) },
+                        width = TvSpacing.CardWidth4Up,
                     )
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun QueryDisplay(query: String, listening: Boolean) {

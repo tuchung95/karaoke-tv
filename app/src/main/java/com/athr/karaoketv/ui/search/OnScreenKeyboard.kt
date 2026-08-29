@@ -40,9 +40,9 @@ fun OnScreenKeyboard(
     firstKeyFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         LETTER_ROWS.forEachIndexed { rowIndex, row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 row.forEachIndexed { keyIndex, ch ->
                     KeyCap(
                         label = ch.toString(),
@@ -52,10 +52,10 @@ fun OnScreenKeyboard(
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            WideKey("Dấu cách", onClick = { onKey(" ") }, widthDp = 148)
-            WideKey("Xóa", onClick = onBackspace, widthDp = 96)
-            WideKey("Xóa hết", onClick = onClear, widthDp = 118)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            WideKey("Dấu cách", onClick = { onKey(" ") }, widthDp = 130)
+            WideKey("Xóa", onClick = onBackspace, widthDp = 84)
+            WideKey("Xóa hết", onClick = onClear, widthDp = 100)
         }
     }
 }
@@ -65,7 +65,7 @@ private fun KeyCap(
     label: String,
     onClick: () -> Unit,
     focusRequester: FocusRequester?,
-) = KeyButton(label, onClick, width = 46, focusRequester = focusRequester)
+) = KeyButton(label, onClick, width = 40, focusRequester = focusRequester)
 
 @Composable
 private fun WideKey(label: String, onClick: () -> Unit, widthDp: Int) =
@@ -81,7 +81,7 @@ private fun KeyButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .size(width = width.dp, height = 46.dp)
+            .size(width = width.dp, height = 40.dp)
             .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.colors(

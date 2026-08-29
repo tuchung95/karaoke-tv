@@ -144,16 +144,26 @@ theo vùng overscan; riêng chữ vẫn nằm trong lề an toàn.
 
 ## Hàng chờ
 
-Dùng `NavigationDrawer`: danh sách bài ở drawer trái, bài đang chọn và các thao tác
-ở khung phải.
+Dạng immersive list: bài mà remote đang dừng trên đó phủ kín phía sau, hàng thẻ
+chạy dọc dưới cùng, và năm thao tác nằm **một lần** ở khung trên thay vì lặp trên
+từng dòng.
 
-Cần nói rõ một đánh đổi: [hướng dẫn của
-Google](https://developer.android.com/design/ui/tv/guides/components/navigation-drawer)
-định component này cho 3–7 điểm đến của app và khuyên không nhét nhiều mục. Hàng chờ
-karaoke thì không có trần, nên nó cuộn. Cái được là năm thao tác chỉ xuất hiện một
-lần ở khung phải thay vì lặp trên từng dòng — bản trước treo cả năm nút vào mỗi
-dòng, thành bức tường nút và các dòng so le vì bài đầu không "lên" được, bài cuối
-không "xuống" được.
+Hai bản trước đều sai. Bản đầu treo cả năm nút vào mỗi dòng — thành bức tường nút,
+lại so le vì bài đầu không "lên" được và bài cuối không "xuống" được. Bản thứ hai
+dùng navigation drawer, nhưng [Google định component đó cho 3–7 điểm đến của
+app](https://developer.android.com/design/ui/tv/guides/components/navigation-drawer),
+không phải danh sách không giới hạn.
+
+## Cài đặt
+
+Đây mới là chỗ navigation drawer đúng chỗ: 5 nhóm — Thư viện, Màn hình chính, Phát
+nhạc, YouTube, Ứng dụng — nằm gọn trong khoảng 3–7 mà tài liệu khuyến nghị. Rail
+thu gọn chỉ hiện icon, bung ra chữ khi focus chạm vào, nội dung ở khung phải.
+
+## Tìm kiếm
+
+Kết quả là lưới thẻ có thumbnail chứ không phải danh sách chữ — nhìn từ xa chọn
+nhanh hơn.
 
 ## Đối chiếu chuẩn chất lượng app TV của Google
 

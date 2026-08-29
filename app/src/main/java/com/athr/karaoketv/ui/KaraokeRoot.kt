@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.ui.components.SongActionSheet
 import com.athr.karaoketv.ui.player.ControlBar
+import com.athr.karaoketv.ui.player.VideoBackButton
 import com.athr.karaoketv.ui.player.IdleStage
 import com.athr.karaoketv.ui.player.NowPlayingHud
 import com.athr.karaoketv.ui.player.VideoStage
@@ -241,6 +242,15 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
 
         AnimatedVisibility(
             visible = !browserVisible && controlsVisible,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier = Modifier.align(Alignment.TopStart),
+        ) {
+            VideoBackButton(onOpenMenu = { browserVisible = true })
+        }
+
+        AnimatedVisibility(
+            visible = !browserVisible && controlsVisible,
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -263,7 +273,6 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                 },
                 onCycleScale = player::cycleScaleMode,
                 onOpenQueue = { push(Screen.Queue) },
-                onOpenMenu = { browserVisible = true },
                 firstFocus = controlFocus,
             )
         }

@@ -43,13 +43,12 @@ enum class HomeTab(val label: String) {
 
 /**
  * The top strip: a search key and the destination tabs in one pill, the utility
- * actions in another, and the library summary on the right — the shape Google TV
- * uses on its own home screen, so the remote lands where a viewer already expects.
+ * actions in another — the shape Google TV uses on its own home screen, so the
+ * remote lands where a viewer already expects.
  */
 @Composable
 fun HomeTopBar(
     selected: HomeTab,
-    summary: String,
     onSearch: () -> Unit,
     onTab: (HomeTab) -> Unit,
     onQueue: () -> Unit,
@@ -106,14 +105,6 @@ fun HomeTopBar(
         RoundIconButton(Icons.Filled.Casino, "Hát ngẫu nhiên", onShuffle)
         RoundIconButton(Icons.Filled.Settings, "Cài đặt", onSettings)
 
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = summary,
-            style = MaterialTheme.typography.labelLarge,
-            color = KaraokeColors.Muted,
-            maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-        )
     }
 }
 

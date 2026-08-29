@@ -40,11 +40,12 @@ fun SongCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
+    width: androidx.compose.ui.unit.Dp = TvSpacing.CardWidth3Up,
 ) {
     TvCard(
         onClick = onClick,
         onLongClick = onLongClick,
-        modifier = modifier.width(TvSpacing.CardWidth3Up),
+        modifier = modifier.width(width),
         contentPadding = PaddingValues(0.dp),
         focusRequester = focusRequester,
     ) {
@@ -53,7 +54,7 @@ fun SongCard(
             modifier = Modifier
                 .fillMaxWidth()
                 // 16:9, the aspect every karaoke rip and every TV shares.
-                .height(TvSpacing.CardWidth3Up * 9 / 16),
+                .height(width * 9 / 16),
         )
         Column(Modifier.padding(14.dp)) {
         // Only when there is something to show — the thumbnail already says
