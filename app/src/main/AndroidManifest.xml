@@ -33,6 +33,11 @@
         <intent>
             <action android:name="android.intent.action.OPEN_DOCUMENT_TREE" />
         </intent>
+        <!-- Same for the YouTube app we hand searches to. -->
+        <package android:name="com.google.android.youtube.tv" />
+        <package android:name="com.google.android.youtube.tvunplugged" />
+        <package android:name="com.google.android.apps.youtube.unplugged" />
+        <package android:name="com.google.android.youtube" />
     </queries>
 
     <application

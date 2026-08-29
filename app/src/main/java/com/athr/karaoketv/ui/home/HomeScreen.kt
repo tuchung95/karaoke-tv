@@ -1,5 +1,6 @@
 package com.athr.karaoketv.ui.home
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -34,6 +36,7 @@ import com.athr.karaoketv.data.db.LibraryGroup
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.player.QueueItem
 import com.athr.karaoketv.ui.components.GroupCard
+import com.athr.karaoketv.ui.components.RequestInitialFocus
 import com.athr.karaoketv.ui.components.SectionHeader
 import com.athr.karaoketv.ui.components.SongCard
 import com.athr.karaoketv.ui.components.TvButton
@@ -75,7 +78,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val searchFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { searchFocus.requestFocus() } }
+    RequestInitialFocus(searchFocus)
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -107,27 +110,33 @@ fun HomeScreen(
                     )
                 }
                 Spacer(Modifier.height(20.dp))
-                // Scrolls: eight buttons do not fit 1920px, and a clipped button
-                // that focus can still reach is a button nobody knows is there.
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    item { TvButton(
+                // Scrolls, but as a plain Row: eight buttons do not fit 1920px, and a
+                // clipped button that focus can still reach is a button nobody knows
+                // is there. Not a LazyRow — its items compose too late for the
+                // initial focus request to attach, which leaves the whole screen
+                // unfocused and the remote dead until some direction key is pressed.
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    TvButton(
                         text = "Tìm bài",
                         onClick = actions.onSearch,
                         icon = Icons.Filled.Search,
                         emphasised = true,
                         focusRequester = searchFocus,
-                    ) }
-                    item { TvButton(
+                    )
+                    TvButton(
                         text = if (shelves.queue.isEmpty()) "Hàng chờ" else "Hàng chờ (${shelves.queue.size})",
                         onClick = actions.onQueue,
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
-                    ) }
-                    item { TvButton("Thể loại", actions.onCategories, icon = Icons.Filled.Folder) }
-                    item { TvButton("Ca sĩ", actions.onArtists, icon = Icons.Filled.Person) }
-                    item { TvButton("Tất cả bài", actions.onAllSongs, icon = Icons.Filled.LibraryMusic) }
-                    item { TvButton("Yêu thích", actions.onFavorites, icon = Icons.Filled.Mic) }
-                    item { TvButton("Ngẫu nhiên", actions.onShuffle, icon = Icons.Filled.Casino) }
-                    item { TvButton("Cài đặt", actions.onSettings, icon = Icons.Filled.Settings) }
+                    )
+                    TvButton("Thể loại", actions.onCategories, icon = Icons.Filled.Folder)
+                    TvButton("Ca sĩ", actions.onArtists, icon = Icons.Filled.Person)
+                    TvButton("Tất cả bài", actions.onAllSongs, icon = Icons.Filled.LibraryMusic)
+                    TvButton("Yêu thích", actions.onFavorites, icon = Icons.Filled.Mic)
+                    TvButton("Ngẫu nhiên", actions.onShuffle, icon = Icons.Filled.Casino)
+                    TvButton("Cài đặt", actions.onSettings, icon = Icons.Filled.Settings)
                 }
             }
         }

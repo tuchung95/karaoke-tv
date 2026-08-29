@@ -32,12 +32,15 @@ fun SettingsScreen(
     scanState: ScanState,
     autoNext: Boolean,
     nextUpBanner: Boolean,
+    appendKaraokeToYouTube: Boolean,
+    youTubeAvailable: Boolean,
     scaleModeLabel: String,
     pitchSemitones: Int,
     onChangeLibrary: () -> Unit,
     onRescan: () -> Unit,
     onToggleAutoNext: () -> Unit,
     onToggleNextUpBanner: () -> Unit,
+    onToggleYouTubeKeyword: () -> Unit,
     onCycleScale: () -> Unit,
     onResetPitch: () -> Unit,
     onClearLibrary: () -> Unit,
@@ -98,6 +101,18 @@ fun SettingsScreen(
                 highlighted = nextUpBanner,
                 onClick = onToggleNextUpBanner,
             )
+        }
+        if (youTubeAvailable) {
+            item {
+                SettingRow(
+                    title = "Thêm \"karaoke\" khi tìm trên YouTube",
+                    description = "Gõ \"gần như là\" sẽ tìm \"gần như là karaoke\". " +
+                        "Bài mở bằng app YouTube — đăng nhập Premium ở đó thì không quảng cáo.",
+                    value = if (appendKaraokeToYouTube) "Bật" else "Tắt",
+                    highlighted = appendKaraokeToYouTube,
+                    onClick = onToggleYouTubeKeyword,
+                )
+            }
         }
         item {
             SettingRow(

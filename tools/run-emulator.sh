@@ -32,7 +32,10 @@ fi
 
 if ! "$ADB" devices | grep -q "^emulator-.*device$"; then
   say "Khởi động emulator (cửa sổ sẽ hiện ra)"
-  "$EMULATOR" -avd "$AVD_NAME" -no-snapshot -no-boot-anim >/tmp/karaoke-emulator.log 2>&1 &
+  # nohup + disown: nếu không, emulator chết theo shell vừa gọi script.
+  nohup "$EMULATOR" -avd "$AVD_NAME" -no-snapshot -no-boot-anim \
+    >/tmp/karaoke-emulator.log 2>&1 &
+  disown
   say "Chờ máy ảo boot xong…"
   "$ADB" wait-for-device
   until [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do

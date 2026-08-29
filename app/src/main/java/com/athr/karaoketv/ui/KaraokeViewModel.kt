@@ -8,6 +8,7 @@ import com.athr.karaoketv.KaraokeApp
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.data.library.LibrarySource
 import com.athr.karaoketv.data.library.ScanProgress
+import com.athr.karaoketv.data.youtube.YouTubeLauncher
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,6 +128,16 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
 
     fun toggleFavorite(song: SongEntity) {
         viewModelScope.launch { repo.setFavorite(song.id, !song.favorite) }
+    }
+
+    /**
+     * Hands the typed query to the YouTube app. Our own playback is paused first,
+     * or two videos end up singing over each other on the same TV.
+     */
+    fun searchOnYouTube(context: android.content.Context, query: String): Boolean {
+        if (query.isBlank()) return false
+        player.player.pause()
+        return YouTubeLauncher.openSearch(context, query, prefs.appendKaraokeToYouTube)
     }
 
     fun shuffleIntoQueue(count: Int = 10) {

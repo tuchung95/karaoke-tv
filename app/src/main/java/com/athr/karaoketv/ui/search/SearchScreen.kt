@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.db.SongEntity
+import com.athr.karaoketv.ui.components.RequestInitialFocus
 import com.athr.karaoketv.ui.components.SongRow
 import com.athr.karaoketv.ui.components.TvButton
 import com.athr.karaoketv.ui.theme.KaraokeColors
@@ -53,10 +55,12 @@ fun SearchScreen(
     onClear: () -> Unit,
     onSongClick: (SongEntity) -> Unit,
     onSongOptions: (SongEntity) -> Unit,
+    youTubeAvailable: Boolean,
+    onYouTubeSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val firstKeyFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { firstKeyFocus.requestFocus() } }
+    RequestInitialFocus(firstKeyFocus)
 
     val voice = rememberVoiceSearch(
         onPartial = onQueryChange,
@@ -92,6 +96,23 @@ fun SearchScreen(
                     text = voice.error!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = KaraokeColors.Danger,
+                )
+            }
+            if (youTubeAvailable) {
+                Spacer(Modifier.height(12.dp))
+                TvButton(
+                    text = "Tìm bài này trên YouTube",
+                    icon = Icons.Filled.PlayCircleOutline,
+                    onClick = onYouTubeSearch,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    // Ad-free comes from the YouTube app's own account, not from us.
+                    text = "Mở bằng app YouTube trên box. Đăng nhập Premium ở đó thì " +
+                        "không quảng cáo. Bài từ YouTube không chỉnh tông hay bỏ giọng được.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = KaraokeColors.Muted,
                 )
             }
             Spacer(Modifier.height(20.dp))

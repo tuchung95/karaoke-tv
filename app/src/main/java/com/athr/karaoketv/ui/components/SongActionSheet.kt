@@ -43,7 +43,7 @@ fun SongActionSheet(
     onToggleFavorite: () -> Unit,
 ) {
     val firstFocus = remember { FocusRequester() }
-    LaunchedEffect(song.id) { runCatching { firstFocus.requestFocus() } }
+    RequestInitialFocus(firstFocus, key = song.id)
 
     Dialog(onDismissRequest = onDismiss) {
         Column(

@@ -19,10 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.athr.karaoketv.data.db.SongEntity
+import com.athr.karaoketv.data.youtube.YouTubeLauncher
 import com.athr.karaoketv.ui.browse.GroupGridScreen
 import com.athr.karaoketv.ui.browse.SongListScreen
 import com.athr.karaoketv.ui.home.HomeActions
@@ -117,8 +119,11 @@ private fun SearchRoute(
     onSongSelected: (SongEntity) -> Unit,
     onSongOptions: (SongEntity) -> Unit,
 ) {
+    val context = LocalContext.current
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.searchResults.collectAsStateWithLifecycle()
+    val youTubeAvailable = remember { YouTubeLauncher.isAvailable(context) }
+
     SearchScreen(
         query = query,
         results = results,
@@ -128,6 +133,8 @@ private fun SearchRoute(
         onClear = vm::clearQuery,
         onSongClick = onSongSelected,
         onSongOptions = onSongOptions,
+        youTubeAvailable = youTubeAvailable,
+        onYouTubeSearch = { vm.searchOnYouTube(context, query) },
     )
 }
 
@@ -183,6 +190,9 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
     val pitch by vm.player.pitchSemitones.collectAsStateWithLifecycle()
     var autoNext by remember { mutableStateOf(vm.prefs.autoNext) }
     var nextUpBanner by remember { mutableStateOf(vm.prefs.showNextUpBanner) }
+    var youTubeKeyword by remember { mutableStateOf(vm.prefs.appendKaraokeToYouTube) }
+    val context = LocalContext.current
+    val youTubeAvailable = remember { YouTubeLauncher.isAvailable(context) }
 
     SettingsScreen(
         libraryLabel = vm.libraryLabel,
@@ -190,6 +200,8 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
         scanState = scanState,
         autoNext = autoNext,
         nextUpBanner = nextUpBanner,
+        appendKaraokeToYouTube = youTubeKeyword,
+        youTubeAvailable = youTubeAvailable,
         scaleModeLabel = when (scaleMode) {
             1 -> "Phóng to"
             2 -> "Kéo đầy"
@@ -205,6 +217,10 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
         onToggleNextUpBanner = {
             nextUpBanner = !nextUpBanner
             vm.prefs.showNextUpBanner = nextUpBanner
+        },
+        onToggleYouTubeKeyword = {
+            youTubeKeyword = !youTubeKeyword
+            vm.prefs.appendKaraokeToYouTube = youTubeKeyword
         },
         onCycleScale = vm.player::cycleScaleMode,
         onResetPitch = { vm.player.setPitch(0) },

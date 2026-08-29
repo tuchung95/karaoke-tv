@@ -50,6 +50,11 @@ class AppPrefs(context: Context) {
         get() = sp.getInt(KEY_PITCH, 0)
         set(value) = sp.edit { putInt(KEY_PITCH, value.coerceIn(-6, 6)) }
 
+    /** Append "karaoke" to a YouTube search, since that is how the rips are titled. */
+    var appendKaraokeToYouTube: Boolean
+        get() = sp.getBoolean(KEY_YT_KEYWORD, true)
+        set(value) = sp.edit { putBoolean(KEY_YT_KEYWORD, value) }
+
     val libraryConfigured: Boolean get() = !libraryUri.isNullOrBlank()
 
     fun libraryUriFlow(): Flow<String?> = keyFlow(KEY_LIBRARY_URI).map { libraryUri }
@@ -75,5 +80,6 @@ class AppPrefs(context: Context) {
         private const val KEY_NEXT_BANNER = "next_up_banner"
         private const val KEY_SCALE_MODE = "video_scale_mode"
         private const val KEY_PITCH = "pitch_semitones"
+        private const val KEY_YT_KEYWORD = "youtube_append_karaoke"
     }
 }

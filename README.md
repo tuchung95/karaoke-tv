@@ -86,6 +86,25 @@ nằm trong `keystore.properties`. Cả hai đều đã bị `.gitignore` loại
 key cũ; mất key thì phải gỡ app rồi cài lại từ đầu, và mất hết bài yêu thích cùng
 lịch sử hát.
 
+## YouTube
+
+Màn hình tìm kiếm có nút **"Tìm bài này trên YouTube"**: gõ tên bài rồi bấm, app
+mở YouTube trên box ngay tại trang kết quả (tự thêm chữ "karaoke" vào từ khoá,
+tắt được trong Cài đặt).
+
+**Không quảng cáo đến từ app YouTube, không phải từ app này.** Chỉ cần đăng nhập
+tài khoản Premium trong app YouTube trên box là xong — app karaoke không cần đăng
+nhập gì, và cũng không có chỗ nào để đăng nhập.
+
+Phát cố ý để nguyên trong player của YouTube thay vì kéo về ExoPlayer của app.
+Đó là điều khoản của YouTube yêu cầu, và cũng là cách duy nhất giữ được Premium:
+ad-free do player chính thức thực thi theo tài khoản đang đăng nhập, nên luồng
+phát ở bất kỳ chỗ nào khác đều dính quảng cáo kể cả khi bạn đã trả tiền.
+
+Đánh đổi thì có thật: bài mở từ YouTube nằm ngoài bộ phát của app, nên **không
+chỉnh tông, không bỏ giọng ca sĩ, không vào hàng chờ được**. Ba thứ đó chỉ áp
+dụng cho file trên ổ cứng.
+
 ## Thử trên máy Mac trước, không cần box
 
 ```bash

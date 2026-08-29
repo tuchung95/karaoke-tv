@@ -16,7 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GraphicEq
@@ -240,43 +241,38 @@ fun ControlBar(
     firstFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
-    // Scrolls: the full transport does not fit 1920px once the labels are in
-    // Vietnamese, and a control the viewer cannot see is a control they do not have.
-    LazyRow(
+    // Scrolls as a plain Row for the same reason as the home shelf: a LazyRow's
+    // items compose too late for the focus request below to attach.
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xE6000000))))
+            .horizontalScroll(rememberScrollState())
             .padding(horizontal = 48.dp, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item {
-            TvButton(
-                text = if (isPlaying) "Tạm dừng" else "Phát",
-                icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                onClick = onPlayPause,
-                emphasised = true,
-                focusRequester = firstFocus,
-            )
-        }
-        item { TvButton("Hát lại", onRestart, icon = Icons.Filled.Replay) }
-        item { TvButton("Bài kế", onNext, icon = Icons.Filled.SkipNext) }
-        item { TvButton("Tông −", onPitchDown) }
-        item {
-            Text(
-                text = if (pitchSemitones == 0) "Tông gốc"
-                else "Tông ${if (pitchSemitones > 0) "+" else ""}$pitchSemitones",
-                style = MaterialTheme.typography.titleMedium,
-                color = if (pitchSemitones == 0) KaraokeColors.Muted else KaraokeColors.Success,
-            )
-        }
-        item { TvButton("Tông +", onPitchUp) }
-        item { TvButton(vocalMode.label(), onCycleVocal, icon = Icons.Filled.GraphicEq) }
-        if (hasAudioTrackChoice) {
-            item { TvButton("Kênh tiếng", onCycleAudioTrack) }
-        }
-        item { TvButton(scaleLabel(scaleMode), onCycleScale) }
-        item { TvButton("Hàng chờ", onOpenQueue, icon = Icons.AutoMirrored.Filled.QueueMusic) }
+        TvButton(
+            text = if (isPlaying) "Tạm dừng" else "Phát",
+            icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+            onClick = onPlayPause,
+            emphasised = true,
+            focusRequester = firstFocus,
+        )
+        TvButton("Hát lại", onRestart, icon = Icons.Filled.Replay)
+        TvButton("Bài kế", onNext, icon = Icons.Filled.SkipNext)
+        TvButton("Tông −", onPitchDown)
+        Text(
+            text = if (pitchSemitones == 0) "Tông gốc"
+            else "Tông ${if (pitchSemitones > 0) "+" else ""}$pitchSemitones",
+            style = MaterialTheme.typography.titleMedium,
+            color = if (pitchSemitones == 0) KaraokeColors.Muted else KaraokeColors.Success,
+        )
+        TvButton("Tông +", onPitchUp)
+        TvButton(vocalMode.label(), onCycleVocal, icon = Icons.Filled.GraphicEq)
+        if (hasAudioTrackChoice) TvButton("Kênh tiếng", onCycleAudioTrack)
+        TvButton(scaleLabel(scaleMode), onCycleScale)
+        TvButton("Hàng chờ", onOpenQueue, icon = Icons.AutoMirrored.Filled.QueueMusic)
     }
 }
 

@@ -117,12 +117,16 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
     }
 
     // With the browser closed and no controls up, the stage owns the remote.
+    // Retried, because a dropped focus request leaves the remote doing nothing.
     LaunchedEffect(browserVisible, controlsVisible) {
-        if (!browserVisible && !controlsVisible) {
-            runCatching { stageFocus.requestFocus() }
-        }
-        if (controlsVisible) {
-            runCatching { controlFocus.requestFocus() }
+        val target = when {
+            controlsVisible -> controlFocus
+            !browserVisible -> stageFocus
+            else -> null
+        } ?: return@LaunchedEffect
+        repeat(15) {
+            if (runCatching { target.requestFocus() }.isSuccess) return@LaunchedEffect
+            delay(40)
         }
     }
 

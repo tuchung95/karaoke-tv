@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.data.library.StorageAccess
 import com.athr.karaoketv.data.library.StorageVolumes
 import com.athr.karaoketv.ui.ScanState
+import com.athr.karaoketv.ui.components.RequestInitialFocus
 import com.athr.karaoketv.ui.components.TvButton
 import com.athr.karaoketv.ui.components.TvFocusable
 import com.athr.karaoketv.ui.theme.KaraokeColors
@@ -77,7 +78,7 @@ fun SetupScreen(
     val fileAccess = remember(accessNonce) { StorageAccess.hasFileSystemAccess(context) }
     val needsAllFiles = remember(accessNonce) { StorageAccess.needsAllFilesAccess(context) }
 
-    LaunchedEffect(Unit) { runCatching { firstFocus.requestFocus() } }
+    RequestInitialFocus(firstFocus)
 
     val treePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()

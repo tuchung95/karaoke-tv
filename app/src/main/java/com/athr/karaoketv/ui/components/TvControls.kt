@@ -96,6 +96,9 @@ fun TvButton(
         shape = RoundedCornerShape(12.dp),
         containerColor = if (emphasised) KaraokeColors.Primary else KaraokeColors.Surface,
         focusedContainerColor = if (emphasised) KaraokeColors.Primary else KaraokeColors.SurfaceHigh,
+        // A pink ring on a pink button is no ring at all: the emphasised button
+        // needs a contrasting one or nobody can tell it is the selected control.
+        focusRing = if (emphasised) KaraokeColors.OnSurface else KaraokeColors.Primary,
         contentPadding = PaddingValues(horizontal = 22.dp, vertical = 12.dp),
         focusRequester = focusRequester,
     ) { focused ->
