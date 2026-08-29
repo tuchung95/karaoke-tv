@@ -46,6 +46,18 @@ object StorageAccess {
         else -> true
     }
 
+    /** The plain runtime permission that unlocks the system video index. */
+    fun mediaPermission(): String =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_VIDEO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+    fun hasMediaAccess(context: Context): Boolean =
+        ContextCompat.checkSelfPermission(context, mediaPermission()) ==
+            PackageManager.PERMISSION_GRANTED
+
     /** Can we walk arbitrary paths with the File API right now? */
     fun hasFileSystemAccess(context: Context): Boolean = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> Environment.isExternalStorageManager()

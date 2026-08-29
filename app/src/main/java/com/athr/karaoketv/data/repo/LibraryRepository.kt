@@ -76,8 +76,16 @@ class LibraryRepository(
         val stored = prefs.libraryUri ?: return null
         return when (prefs.librarySourceKind) {
             AppPrefs.SOURCE_DIRECT -> LibrarySource.DirectPath(stored)
+            AppPrefs.SOURCE_MEDIA -> LibrarySource.MediaLibrary
             else -> LibrarySource.DocumentTree(Uri.parse(stored))
         }
+    }
+
+    /** The system video index, for boxes with no picker and no permission screen. */
+    fun useMediaLibrary(label: String) {
+        prefs.libraryUri = AppPrefs.SOURCE_MEDIA
+        prefs.librarySourceKind = AppPrefs.SOURCE_MEDIA
+        prefs.libraryLabel = label
     }
 
     /** Persists the tree grant so the library survives a reboot of the box. */

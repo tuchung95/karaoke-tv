@@ -145,6 +145,11 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
         startScan()
     }
 
+    fun useMediaLibrary(label: String = "Video trên máy") {
+        repo.useMediaLibrary(label)
+        startScan()
+    }
+
     fun useDirectPath(path: String, label: String) {
         repo.useDirectPath(path, label)
         startScan()
@@ -202,6 +207,15 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
     }
 
     // ---- updates ------------------------------------------------------------
+
+    private var launchCheckDone = false
+
+    /** One quiet check per launch, so an out-of-date box does not stay that way. */
+    fun checkForUpdateOnLaunch() {
+        if (launchCheckDone) return
+        launchCheckDone = true
+        checkForUpdate()
+    }
 
     fun checkForUpdate() {
         updateJob?.cancel()

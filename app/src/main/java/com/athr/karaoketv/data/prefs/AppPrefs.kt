@@ -111,6 +111,7 @@ class AppPrefs(context: Context) {
     companion object {
         const val SOURCE_SAF = "saf"
         const val SOURCE_DIRECT = "direct"
+        const val SOURCE_MEDIA = "media"
 
         private const val KEY_LIBRARY_URI = "library_uri"
         private const val KEY_SOURCE_KIND = "library_source_kind"

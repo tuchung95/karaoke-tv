@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -64,6 +65,7 @@ fun SetupScreen(
     songCount: Int,
     onTreePicked: (Uri, String) -> Unit,
     onDirectPicked: (String, String) -> Unit,
+    onUseMediaLibrary: () -> Unit,
     onRescan: () -> Unit,
     onDone: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -99,6 +101,26 @@ fun SetupScreen(
         ActivityResultContracts.RequestPermission()
     ) { accessNonce++ }
 
+    val mediaPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        accessNonce++
+        if (granted) {
+            onUseMediaLibrary()
+        } else {
+            pickerError = "Chưa có quyền đọc video. Không quét được."
+        }
+    }
+
+    fun useMediaLibrary() {
+        pickerError = null
+        if (StorageAccess.hasMediaAccess(context)) {
+            onUseMediaLibrary()
+        } else {
+            mediaPermission.launch(StorageAccess.mediaPermission())
+        }
+    }
+
     fun openTreePicker(initial: Uri?) {
         pickerError = null
         try {
@@ -122,7 +144,9 @@ fun SetupScreen(
         when {
             fileAccess -> onDirectPicked(volume.path, volume.label)
             pickerAvailable -> openTreePicker(StorageVolumes.documentInitialUri(volume.path))
-            else -> requestFileAccess()
+            // No picker and no permission screen: the media index still sees this
+            // drive, so send them down the route that actually works.
+            else -> useMediaLibrary()
         }
     }
 
@@ -154,25 +178,31 @@ fun SetupScreen(
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             var focusTaken = false
+            // First, because it is the only route that works on every box: the
+            // system's own video index, behind an ordinary permission dialog.
+            // Plenty of TV boxes have neither a folder picker nor an all-files
+            // permission screen, and there the other two buttons lead nowhere.
+            TvButton(
+                text = "Quét video trên máy",
+                icon = Icons.Filled.VideoLibrary,
+                emphasised = true,
+                focusRequester = firstFocus,
+                onClick = { useMediaLibrary() },
+            )
+            focusTaken = true
             if (pickerAvailable) {
                 TvButton(
                     text = "Chọn thư mục…",
                     icon = Icons.Filled.FolderOpen,
-                    emphasised = true,
-                    focusRequester = firstFocus,
                     onClick = { openTreePicker(null) },
                 )
-                focusTaken = true
             }
             if (!fileAccess) {
                 TvButton(
                     text = "Cấp quyền đọc ổ cứng",
                     icon = Icons.Filled.Lock,
-                    emphasised = !focusTaken,
-                    focusRequester = if (focusTaken) null else firstFocus,
                     onClick = { requestFileAccess() },
                 )
-                focusTaken = true
             }
             if (currentLabel.isNotBlank()) {
                 TvButton(
@@ -194,7 +224,9 @@ fun SetupScreen(
 
         Spacer(Modifier.height(12.dp))
         Text(
-            text = accessAdvice(pickerAvailable, fileAccess, needsAllFiles, allFilesIntent != null),
+            text = "Cách chắc chắn nhất: bấm \"Quét video trên máy\" — app đọc thư " +
+                "viện video của hệ thống, thấy được cả video trên USB. Chọn thư mục " +
+                "riêng chỉ dùng được nếu box có sẵn trình chọn thư mục.",
             style = MaterialTheme.typography.bodyLarge,
             color = KaraokeColors.Muted,
         )
@@ -259,7 +291,7 @@ fun SetupScreen(
     }
 }
 
-private fun accessAdvice(
+private fun accessAdviceUnused(
     pickerAvailable: Boolean,
     fileAccess: Boolean,
     needsAllFiles: Boolean,

@@ -109,6 +109,21 @@ phát ở bất kỳ chỗ nào khác đều dính quảng cáo kể cả khi b�
 chỉnh tông, không bỏ giọng ca sĩ, không vào hàng chờ được**. Ba thứ đó chỉ áp
 dụng cho file trên ổ cứng.
 
+## Chọn nguồn nhạc
+
+Ba đường, app tự dò xem box hỗ trợ đường nào:
+
+1. **Quét video trên máy** (khuyên dùng) — đọc thư viện video của hệ thống qua
+   MediaStore, thấy được cả video trên USB. Chỉ cần quyền đọc video, xin bằng hộp
+   thoại thường mà máy Android nào cũng có.
+2. **Chọn thư mục** — cần box có sẵn trình chọn thư mục của hệ thống.
+3. **Cấp quyền đọc ổ cứng** rồi quét thẳng đường dẫn — cần box có màn hình cấp
+   quyền toàn tệp.
+
+Đường 1 tồn tại vì đường 2 và 3 đều tắc trên máy thật: TV360 B866V2F chạy ATV12
+**không có cả trình chọn thư mục lẫn màn hình cấp quyền**, nên hai nút kia dẫn đến
+ngõ cụt. MediaStore thì luôn có.
+
 ## Tự cập nhật
 
 Cài đặt → **Phiên bản** → Kiểm tra → Tải về → Cài đặt. App đọc bản phát hành mới

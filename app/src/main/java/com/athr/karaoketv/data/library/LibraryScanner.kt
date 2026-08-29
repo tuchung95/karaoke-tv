@@ -1,6 +1,9 @@
 package com.athr.karaoketv.data.library
 
+import android.content.ContentUris
 import android.content.Context
+import android.os.Build
+import android.provider.MediaStore
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
@@ -55,6 +58,7 @@ class LibraryScanner(
             when (source) {
                 is LibrarySource.DocumentTree -> walkTree(source.treeUri, onFolder, onFile)
                 is LibrarySource.DirectPath -> walkPath(File(source.path), onFolder, onFile)
+                is LibrarySource.MediaLibrary -> walkMediaStore(onFolder, onFile)
             }
             flush()
 
@@ -124,6 +128,67 @@ class LibraryScanner(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Reads the system's video index instead of the filesystem.
+     *
+     * MediaStore already knows every video on every mounted volume, USB included,
+     * and reaching it needs only the ordinary read-video permission — no folder
+     * picker, no all-files access, neither of which some TV boxes have at all.
+     */
+    private suspend fun walkMediaStore(
+        onFolder: suspend (String) -> Unit,
+        onFile: suspend (RawFile) -> Unit,
+    ) {
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        val projection = arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.DATE_MODIFIED,
+            MediaStore.Video.Media.RELATIVE_PATH,
+        )
+        val cursor = context.contentResolver.query(
+            collection,
+            projection,
+            null,
+            null,
+            "${MediaStore.Video.Media.RELATIVE_PATH} ASC",
+        ) ?: throw SecurityException("Không đọc được thư viện video của máy")
+
+        cursor.use {
+            val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val nameCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+            val dateCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
+            val pathCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.RELATIVE_PATH)
+            var lastFolder = ""
+
+            while (it.moveToNext()) {
+                val name = it.getString(nameCol) ?: continue
+                if (!MediaFiles.isVideo(name)) continue
+                val relPath = (it.getString(pathCol) ?: "").trim('/')
+                if (relPath != lastFolder) {
+                    lastFolder = relPath
+                    onFolder(relPath.ifBlank { "Bộ nhớ máy" })
+                }
+                onFile(
+                    RawFile(
+                        uri = ContentUris.withAppendedId(collection, it.getLong(idCol)).toString(),
+                        fileName = name,
+                        relPath = relPath,
+                        sizeBytes = it.getLong(sizeCol),
+                        lastModified = it.getLong(dateCol) * 1000L,
+                    )
+                )
             }
         }
     }

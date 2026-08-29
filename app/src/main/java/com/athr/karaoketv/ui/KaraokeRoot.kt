@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.ui.components.SongActionSheet
 import com.athr.karaoketv.ui.player.ControlBar
+import com.athr.karaoketv.ui.setup.UpdateGate
 import com.athr.karaoketv.ui.player.VideoBackButton
 import com.athr.karaoketv.ui.player.IdleStage
 import com.athr.karaoketv.ui.player.NowPlayingHud
@@ -53,18 +55,51 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
     val scanState by vm.scanState.collectAsStateWithLifecycle()
 
     var setupVisible by remember { mutableStateOf(!vm.libraryConfigured) }
+
+    // Checked once per launch. A karaoke box lives in a cabinet and nobody goes
+    // looking for a settings screen, so an out-of-date one stays out of date
+    // unless the app says something.
+    val context = LocalContext.current
+    val updateState by vm.updateState.collectAsStateWithLifecycle()
+    var updateDismissed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { vm.checkForUpdateOnLaunch() }
+    val updateBlocking = !updateDismissed && when (updateState) {
+        is UpdateState.Available, is UpdateState.Downloading,
+        is UpdateState.Ready, is UpdateState.InstallManually,
+        -> true
+        else -> false
+    }
+    val updateGate: @Composable () -> Unit = {
+        UpdateGate(
+            state = updateState,
+            currentVersion = vm.currentVersion,
+            onAct = {
+                when (updateState) {
+                    is UpdateState.Available -> vm.downloadUpdate(context)
+                    is UpdateState.Ready -> vm.installUpdate(context)
+                    else -> vm.checkForUpdate()
+                }
+            },
+            onDismiss = { updateDismissed = true },
+        )
+    }
     val leaveSetup: () -> Unit = {
         vm.dismissScanResult()
         setupVisible = false
     }
 
     if (setupVisible) {
+        if (updateBlocking) {
+            updateGate()
+            return
+        }
         SetupScreen(
             scanState = scanState,
             currentLabel = vm.libraryLabel,
             songCount = songCount,
             onTreePicked = { uri, label -> vm.useDocumentTree(uri, label) },
             onDirectPicked = { path, label -> vm.useDirectPath(path, label) },
+            onUseMediaLibrary = { vm.useMediaLibrary() },
             onRescan = vm::startScan,
             onDone = if (vm.libraryConfigured) leaveSetup else null,
         )
@@ -322,6 +357,11 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                     .padding(horizontal = 24.dp, vertical = 14.dp),
             )
         }
+    }
+
+    if (updateBlocking) {
+        updateGate()
+        return
     }
 
     val sheetSong = actionSheetSong
