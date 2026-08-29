@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
@@ -22,6 +24,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,6 +33,8 @@ import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.tv.material3.Icon
+import androidx.tv.material3.IconButtonDefaults
+import androidx.tv.material3.IconButton
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import androidx.compose.runtime.Composable
@@ -122,12 +128,6 @@ fun NowPlayingHud(
                         }
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "▲▼ Điều khiển",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = KaraokeColors.Muted,
-                        )
-                        Spacer(Modifier.height(6.dp))
                     if (queueSize > 0) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -242,10 +242,13 @@ fun VideoTopBar(
     onOpenMenu: () -> Unit,
     onOpenQueue: () -> Unit,
     queueSize: Int,
+    isFavorite: Boolean,
+    onToggleFavorite: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
             .background(Brush.verticalGradient(listOf(Color(0xCC000000), Color.Transparent)))
             .padding(horizontal = 58.dp, vertical = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -263,6 +266,38 @@ fun VideoTopBar(
             onClick = onOpenQueue,
             icon = Icons.AutoMirrored.Filled.QueueMusic,
         )
+
+        if (onToggleFavorite != null) {
+            Spacer(Modifier.weight(1f))
+            // Where the key hints used to sit. Marking the song you just enjoyed
+            // is worth a button; a reminder of which key does what is not, once
+            // every one of those keys has a visible control of its own.
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier.size(IconButtonDefaults.MediumButtonSize),
+                shape = IconButtonDefaults.shape(shape = CircleShape),
+                colors = IconButtonDefaults.colors(
+                    containerColor = KaraokeColors.Surface,
+                    contentColor = if (isFavorite) {
+                        KaraokeColors.Primary
+                    } else {
+                        KaraokeColors.Muted
+                    },
+                    focusedContainerColor = KaraokeColors.OnSurface,
+                    focusedContentColor = KaraokeColors.Background,
+                ),
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) {
+                        Icons.Filled.Favorite
+                    } else {
+                        Icons.Filled.FavoriteBorder
+                    },
+                    contentDescription = if (isFavorite) "Bỏ yêu thích" else "Thêm vào yêu thích",
+                    modifier = Modifier.size(IconButtonDefaults.MediumIconSize),
+                )
+            }
+        }
     }
 }
 

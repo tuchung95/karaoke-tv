@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
@@ -40,12 +41,15 @@ import androidx.tv.material3.TabDefaults
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
+import com.athr.karaoketv.ui.components.rememberSoundedInteractionSource
+import com.athr.karaoketv.ui.components.withSelectSound
 import com.athr.karaoketv.ui.theme.KaraokeColors
 
 /** The destinations that sit in the tab strip, in order. */
 enum class HomeTab(val label: String) {
     HOME("Trang chủ"),
     CATEGORIES("Thể loại"),
+    FOLDERS("Thư mục"),
     ARTISTS("Ca sĩ"),
     ALL_SONGS("Tất cả bài"),
     FAVORITES("Yêu thích"),
@@ -68,6 +72,12 @@ fun HomeTopBar(
     searchFocus: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
+    // While the strip has focus the indicator follows the remote rather than the
+    // current screen: otherwise moving along the tabs changes nothing on screen and
+    // there is no way to tell what pressing OK would open.
+    var focusedTab by remember { mutableStateOf<HomeTab?>(null) }
+    val indicated = focusedTab ?: selected
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -81,7 +91,8 @@ fun HomeTopBar(
         )
 
         TabRow(
-            selectedTabIndex = HomeTab.entries.indexOf(selected),
+            modifier = Modifier.onFocusChanged { if (!it.hasFocus) focusedTab = null },
+            selectedTabIndex = HomeTab.entries.indexOf(indicated),
             separator = { Spacer(Modifier.width(4.dp)) },
             indicator = { tabPositions, doesTabRowHaveFocus ->
                 // Same fill whether or not the row has focus. Left to itself the
@@ -89,7 +100,7 @@ fun HomeTopBar(
                 // single label colour is readable in both states — one of them
                 // ends up light-on-light or dark-on-dark.
                 TabRowDefaults.PillIndicator(
-                    currentTabPosition = tabPositions[HomeTab.entries.indexOf(selected)],
+                    currentTabPosition = tabPositions[HomeTab.entries.indexOf(indicated)],
                     doesTabRowHaveFocus = doesTabRowHaveFocus,
                     activeColor = KaraokeColors.OnSurface,
                     inactiveColor = KaraokeColors.OnSurface,
@@ -98,9 +109,10 @@ fun HomeTopBar(
         ) {
             HomeTab.entries.forEach { tab ->
                 Tab(
-                    selected = tab == selected,
-                    onFocus = {},
-                    onClick = { onTab(tab) },
+                    selected = tab == indicated,
+                    onFocus = { focusedTab = tab },
+                    onClick = withSelectSound { onTab(tab) },
+                    interactionSource = rememberSoundedInteractionSource(),
                     // The pill flips between a dim and a bright fill depending on
                     // whether the row has focus, so the label has to flip with it:
                     // light on the dim pill, dark on the bright one. Using one
@@ -177,6 +189,9 @@ private fun RoundIconButton(
             // guess, but a label that appears in the layout would shove the whole
             // bar sideways every time focus moved.
             Popup(
+                // Anchored to the button's bottom edge, then pushed clear of it:
+                // Popup aligns inside the anchor's bounds, so without this the
+                // label sits on top of the icon it is meant to explain.
                 alignment = Alignment.BottomCenter,
                 offset = IntOffset(0, TOOLTIP_OFFSET_PX),
             ) {
@@ -195,7 +210,7 @@ private fun RoundIconButton(
 }
 
 /** Just clear of the button, in raw pixels as Popup offsets require. */
-private const val TOOLTIP_OFFSET_PX = 42
+private const val TOOLTIP_OFFSET_PX = 84
 
 /** Kept so the bar can sit on its own tinted band, as in the reference layout. */
 @Composable

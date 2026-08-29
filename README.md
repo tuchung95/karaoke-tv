@@ -181,6 +181,16 @@ khác trên box và tự im khi người dùng tắt âm hệ thống. Tìm bằ
 riêng lúc bắt đầu nghe, lúc nhận được kết quả và lúc thất bại — đó là thao tác duy
 nhất không có gì chuyển động trên màn hình. Tắt được trong Cài đặt → Phát nhạc.
 
+## Thư mục
+
+Tab **Thư mục** duyệt đúng cây thư mục trên ổ, từng tầng một. Bộ sưu tập rip được
+sắp theo cách người đổ đĩa muốn, và cái cây đó thường là chỉ mục duy nhất có thật —
+"thư mục bố để nhạc bolero" đáng tin hơn mọi thẻ suy ra từ tên file. Các màn khác
+đoán cách nhóm; màn này chỉ hiện thứ đang có.
+
+Cây dựng từ đường dẫn tương đối đã lưu chứ không từ một bảng thư mục riêng, vì hình
+dạng cây thay đổi mỗi lần ai đó cắm ổ vào máy tính.
+
 ## Màu
 
 Dùng thẳng **bảng màu baseline của Material 3** (dark), không pha thêm: mỗi vai trò

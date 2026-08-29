@@ -110,6 +110,7 @@ fun SongRow(
 ) {
     ListItem(
         selected = false,
+        interactionSource = rememberSoundedInteractionSource(),
         onClick = withSelectSound(onClick),
         onLongClick = onLongClick,
         modifier = modifier

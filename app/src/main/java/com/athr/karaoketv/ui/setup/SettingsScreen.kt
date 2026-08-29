@@ -26,8 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.athr.karaoketv.ui.components.rememberSoundedInteractionSource
 import com.athr.karaoketv.ui.components.withSelectSound
-import com.athr.karaoketv.ui.components.navigationSound
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,6 +97,7 @@ fun SettingsScreen(
                     if (entry == SettingsSection.YOUTUBE && !youTubeAvailable) return@forEach
                     NavigationDrawerItem(
                         selected = entry == section,
+                        interactionSource = rememberSoundedInteractionSource(),
                         onClick = withSelectSound({ section = entry }),
                         leadingContent = {
                             Icon(entry.icon, contentDescription = null)
@@ -340,8 +341,9 @@ private fun SettingRow(
 ) {
     ListItem(
         selected = false,
+        interactionSource = rememberSoundedInteractionSource(),
         onClick = withSelectSound(onClick),
-        modifier = Modifier.fillMaxWidth().navigationSound(),
+        modifier = Modifier.fillMaxWidth(),
         colors = karaokeListItemColors(),
         scale = fullWidthRowScale(),
         headlineContent = {

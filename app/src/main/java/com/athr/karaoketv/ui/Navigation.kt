@@ -17,5 +17,8 @@ sealed interface Screen {
     data object Queue : Screen
     data object Settings : Screen
     data object HomeLayout : Screen
+
+    /** A node in the drive's own folder tree. Empty path is the library root. */
+    data class Folder(val path: String, val title: String) : Screen
     data class SongList(val title: String, val source: SongListSource) : Screen
 }

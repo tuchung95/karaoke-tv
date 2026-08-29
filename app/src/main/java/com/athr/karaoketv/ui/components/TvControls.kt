@@ -60,7 +60,7 @@ fun TvButton(
     Button(
         onClick = withSelectSound(onClick),
         modifier = modifier
-            .navigationSound()
+            
             .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         colors = colors,
     ) {
@@ -90,7 +90,7 @@ fun TvCard(
         onClick = withSelectSound(onClick),
         onLongClick = onLongClick,
         modifier = modifier
-            .navigationSound()
+            
             .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         colors = CardDefaults.colors(
             containerColor = KaraokeColors.Surface,

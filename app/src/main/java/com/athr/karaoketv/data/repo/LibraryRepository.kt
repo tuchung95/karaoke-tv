@@ -44,6 +44,37 @@ class LibraryRepository(
     suspend fun byId(id: String) = dao.byId(id)
 
     suspend fun markPlayed(id: String) = dao.markPlayed(id, System.currentTimeMillis())
+    /** A folder directly under some path, and how many songs sit anywhere beneath it. */
+    data class FolderChild(val name: String, val path: String, val songCount: Int)
+
+    /**
+     * Walks the folder tree the way the drive is actually laid out.
+     *
+     * Built from the stored relative paths rather than a table of folders: a rip
+     * collection's shape is whatever someone made on the drive, and it changes
+     * every time they plug it into a laptop.
+     */
+    suspend fun folderChildren(path: String): List<FolderChild> {
+        val counts = dao.folderCounts()
+        val prefix = if (path.isEmpty()) "" else "$path/"
+        val direct = linkedMapOf<String, Int>()
+        for (row in counts) {
+            val full = row.name
+            if (full == path) continue
+            if (prefix.isNotEmpty() && !full.startsWith(prefix)) continue
+            val name = full.removePrefix(prefix).substringBefore('/')
+            if (name.isBlank()) continue
+            direct[name] = (direct[name] ?: 0) + row.songCount
+        }
+        return direct.entries
+            .sortedBy { it.key.lowercase() }
+            .map { (name, count) ->
+                FolderChild(name, if (path.isEmpty()) name else "$path/$name", count)
+            }
+    }
+
+    suspend fun songsDirectlyIn(path: String) = dao.songsDirectlyIn(path)
+
     suspend fun setFavorite(id: String, favorite: Boolean) = dao.setFavorite(id, favorite)
 
     /** Swaps a song's title and artist when the filename put them the other way round. */

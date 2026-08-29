@@ -196,6 +196,10 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
 
     // ---- song actions ------------------------------------------------------
 
+    suspend fun folderChildren(path: String) = repo.folderChildren(path)
+
+    suspend fun songsInFolder(path: String) = repo.songsDirectlyIn(path)
+
     fun swapTitleAndArtist(song: SongEntity) {
         viewModelScope.launch { repo.swapTitleAndArtist(song) }
     }

@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.data.youtube.YouTubeLauncher
+import com.athr.karaoketv.ui.browse.FolderScreen
 import com.athr.karaoketv.ui.browse.GroupGridScreen
 import com.athr.karaoketv.ui.browse.SongListScreen
 import com.athr.karaoketv.ui.home.HomeActions
@@ -74,6 +75,8 @@ fun BrowserContent(
                     Screen.Queue -> QueueRoute(vm)
                     Screen.Settings -> SettingsRoute(vm, onOpenSetup, onNavigate)
                     Screen.HomeLayout -> HomeLayoutRoute(vm)
+                    is Screen.Folder ->
+                        FolderRoute(vm, screen, onNavigate, onSongSelected, onSongOptions)
                     is Screen.SongList ->
                         SongListRoute(vm, screen, onSongSelected, onSongOptions)
                 }
@@ -122,6 +125,7 @@ private fun HomeRoute(
             onSearch = { onNavigate(Screen.Search) },
             onQueue = { onNavigate(Screen.Queue) },
             onCategories = { onNavigate(Screen.Categories) },
+            onFolders = { onNavigate(Screen.Folder("", "Thư mục")) },
             onArtists = { onNavigate(Screen.Artists) },
             onAllSongs = {
                 onNavigate(Screen.SongList("Tất cả bài hát", SongListSource.All))
@@ -336,6 +340,35 @@ private fun SongListRoute(
         onSongClick = onSongSelected,
         onSongOptions = onSongOptions,
         onReachEnd = if (pages) loadNextPage else null,
+    )
+}
+
+@Composable
+private fun FolderRoute(
+    vm: KaraokeViewModel,
+    screen: Screen.Folder,
+    onNavigate: (Screen) -> Unit,
+    onSongSelected: (SongEntity) -> Unit,
+    onSongOptions: (SongEntity) -> Unit,
+) {
+    var folders by remember(screen) {
+        mutableStateOf<List<com.athr.karaoketv.data.repo.LibraryRepository.FolderChild>>(emptyList())
+    }
+    var songs by remember(screen) { mutableStateOf<List<SongEntity>>(emptyList()) }
+
+    LaunchedEffect(screen) {
+        folders = vm.folderChildren(screen.path)
+        songs = vm.songsInFolder(screen.path)
+    }
+
+    FolderScreen(
+        title = screen.title,
+        path = screen.path,
+        folders = folders,
+        songs = songs,
+        onOpenFolder = { onNavigate(Screen.Folder(it.path, it.name)) },
+        onSongClick = onSongSelected,
+        onSongOptions = onSongOptions,
     )
 }
 

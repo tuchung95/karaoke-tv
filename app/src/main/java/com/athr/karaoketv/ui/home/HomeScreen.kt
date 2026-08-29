@@ -62,6 +62,7 @@ data class HomeActions(
     val onSearch: () -> Unit,
     val onQueue: () -> Unit,
     val onCategories: () -> Unit,
+    val onFolders: () -> Unit,
     val onArtists: () -> Unit,
     val onAllSongs: () -> Unit,
     val onFavorites: () -> Unit,
@@ -107,6 +108,7 @@ fun HomeScreen(
                     when (tab) {
                         HomeTab.HOME -> Unit
                         HomeTab.CATEGORIES -> actions.onCategories()
+                        HomeTab.FOLDERS -> actions.onFolders()
                         HomeTab.ARTISTS -> actions.onArtists()
                         HomeTab.ALL_SONGS -> actions.onAllSongs()
                         HomeTab.FAVORITES -> actions.onFavorites()

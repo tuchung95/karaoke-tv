@@ -108,6 +108,18 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE category = :category ORDER BY title COLLATE NOCASE ASC")
     suspend fun songsInCategory(category: String): List<SongEntity>
 
+    /** One row per folder that directly holds songs, with how many it holds. */
+    @Query(
+        """
+        SELECT relPath AS name, COUNT(*) AS songCount FROM songs
+        GROUP BY relPath
+        """
+    )
+    suspend fun folderCounts(): List<LibraryGroup>
+
+    @Query("SELECT * FROM songs WHERE relPath = :path ORDER BY title COLLATE NOCASE ASC")
+    suspend fun songsDirectlyIn(path: String): List<SongEntity>
+
     @Query("SELECT * FROM songs WHERE collection = :collection ORDER BY title COLLATE NOCASE ASC")
     suspend fun songsInCollection(collection: String): List<SongEntity>
 

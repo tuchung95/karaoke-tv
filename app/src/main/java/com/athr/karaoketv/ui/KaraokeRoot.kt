@@ -143,10 +143,19 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
     // of it returns to the picture instead of dumping the room on the home screen.
     var openedFromVideo by remember { mutableStateOf(false) }
 
-    fun leaveBrowser(): Boolean {
-        if (!openedFromVideo) return false
+    /**
+     * Every route back to the picture clears the flag. Leaving it set means a later,
+     * ordinary trip into the browser would also "return" to the video on back —
+     * long after the trip that earned that behaviour ended.
+     */
+    fun showVideo() {
         openedFromVideo = false
         browserVisible = false
+    }
+
+    fun leaveBrowser(): Boolean {
+        if (!openedFromVideo) return false
+        showVideo()
         return true
     }
 
@@ -213,7 +222,7 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                 if (backStack.size == 1) leaveBrowser()
             }
             browserVisible && openedFromVideo -> leaveBrowser()
-            browserVisible && current != null -> browserVisible = false
+            browserVisible && current != null -> showVideo()
             !browserVisible -> browserVisible = true
             // A shared remote gets pressed by everyone; one stray BACK should not
             // end the night. Confirm before leaving.
@@ -317,6 +326,10 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                     browserVisible = true
                 },
                 queueSize = queue.size,
+                isFavorite = current?.song?.favorite == true,
+                onToggleFavorite = current?.let { item ->
+                    { vm.toggleFavorite(item.song) }
+                },
             )
         }
 
@@ -373,7 +386,7 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                         if (backStack.size > 1) backStack.removeRange(1, backStack.size)
                     },
                     onWatchVideo = if (current != null) {
-                        { browserVisible = false }
+                        { showVideo() }
                     } else {
                         null
                     },
