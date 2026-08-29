@@ -247,20 +247,17 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
                                 hudVisible = true
                                 true
                             }
-                            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_MENU -> {
+                            // Either direction brings the transport up: with the
+                            // picture full screen there is nothing else for up and
+                            // down to mean, and half the room will try the wrong one.
+                            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_UP,
+                            KeyEvent.KEYCODE_MENU,
+                            -> {
                                 controlsVisible = true
                                 hudVisible = true
                                 true
                             }
-                            // Up goes straight to the queue: mid-party that is
-                            // the thing people reach for, not the home screen.
-                            KeyEvent.KEYCODE_DPAD_UP -> {
-                                if (backStack.lastOrNull() != Screen.Queue) {
-                                    push(Screen.Queue)
-                                }
-                                browserVisible = true
-                                true
-                            }
+
                             KeyEvent.KEYCODE_MEDIA_NEXT -> { player.next(); true }
                             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                                 player.togglePlayPause()

@@ -167,8 +167,7 @@ khác.
 
 | Phím | Tác dụng |
 |---|---|
-| ▲ Lên | Mở hàng chờ |
-| ▼ Xuống | Thanh điều khiển |
+| ▲ ▼ | Thanh điều khiển |
 | OK | Phát / tạm dừng |
 | ◀ ▶ | Tua 10 giây |
 | BACK | Về menu |
@@ -176,8 +175,33 @@ khác.
 Âm thanh: focus và chọn dùng hiệu ứng có sẵn của hệ thống, nên khớp với mọi app
 khác trên box và tự im khi người dùng tắt âm hệ thống. Tìm bằng giọng nói có tông
 riêng lúc bắt đầu nghe, lúc nhận được kết quả và lúc thất bại — đó là thao tác duy
-nhất không có gì chuyển động trên màn hình, không có tiếng thì không ai biết box
-đang nghe hay micro đã hỏng. Tắt được trong Cài đặt → Phát nhạc.
+nhất không có gì chuyển động trên màn hình. Tắt được trong Cài đặt → Phát nhạc.
+
+## Màu
+
+Theo [hệ màu Android TV](https://developer.android.com/design/ui/tv/guides/styles/color-system):
+dark theme, và **điền đủ cả 29 vai trò** của `ColorScheme`. Bỏ trống không có nghĩa
+là để rỗng — chúng rơi về màu tím mặc định của Material, nên component nào chạm tới
+`tertiaryContainer` hay `surfaceTint` sẽ tự sơn màu của thương hiệu khác.
+
+Tông theo quy ước dark theme của M3 (accent 80, "on" 20, container 30, "on
+container" 90), trừ những màu thương hiệu vốn đã đủ tương phản.
+
+Đo lại toàn bộ trên nền `#07090D`, mốc WCAG là 4.5:1 cho chữ thường và 3:1 cho
+ranh giới giao diện:
+
+| Cặp màu | Tỉ lệ |
+|---|---|
+| onSurface | 18.10 |
+| onSurfaceVariant | 7.56 |
+| primary | 6.36 |
+| tertiary | 10.90 |
+| error | 7.18 |
+| onPrimary trên primary | 6.39 |
+
+Phép đo này tìm ra một lỗi: màu viền cũ `#2A3140` chỉ đạt **1.53:1** — gần như vô
+hình. Đã nâng lên `#5A6577` (3.38:1); màu cũ lùi về làm `borderVariant`, chỉ dùng
+cho đường kẻ trang trí chứ không dùng cho cạnh của thành phần bấm được.
 
 ## Hàng chờ
 

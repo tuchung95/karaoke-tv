@@ -114,6 +114,37 @@ fun QueueScreen(
         )
 
         Column(Modifier.fillMaxSize()) {
+            if (queue.isNotEmpty()) {
+                Text(
+                    text = "${queue.size} bài đang chờ",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = KaraokeColors.Muted,
+                    modifier = Modifier.padding(
+                        start = TvSpacing.ScreenHorizontal,
+                        top = 4.dp,
+                        bottom = 8.dp,
+                    ),
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
+                    contentPadding = PaddingValues(
+                        start = TvSpacing.ScreenHorizontal,
+                        end = TvSpacing.ScreenHorizontal,
+                    ),
+                ) {
+                    itemsIndexed(queue, key = { _, item -> item.uid }) { _, item ->
+                        SongCard(
+                            song = item.song,
+                            onClick = { onPlayNow(item) },
+                            onLongClick = { onPrioritise(item) },
+                            modifier = Modifier.onFocusChanged { state ->
+                                if (state.isFocused) focusedUid = item.uid
+                            },
+                        )
+                    }
+                }
+            }
             Column(
                 Modifier
                     .weight(1f)
@@ -220,37 +251,6 @@ fun QueueScreen(
                 }
             }
 
-            if (queue.isNotEmpty()) {
-                Text(
-                    text = "${queue.size} bài đang chờ",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = KaraokeColors.Muted,
-                    modifier = Modifier.padding(
-                        start = TvSpacing.ScreenHorizontal,
-                        bottom = 8.dp,
-                    ),
-                )
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(TvSpacing.CardGap),
-                    contentPadding = PaddingValues(
-                        start = TvSpacing.ScreenHorizontal,
-                        end = TvSpacing.ScreenHorizontal,
-                        bottom = TvSpacing.ScreenVertical,
-                    ),
-                ) {
-                    itemsIndexed(queue, key = { _, item -> item.uid }) { _, item ->
-                        SongCard(
-                            song = item.song,
-                            onClick = { onPlayNow(item) },
-                            onLongClick = { onPrioritise(item) },
-                            modifier = Modifier.onFocusChanged { state ->
-                                if (state.isFocused) focusedUid = item.uid
-                            },
-                        )
-                    }
-                }
-            }
         }
     }
 }
