@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -97,7 +98,13 @@ fun HomeScreen(
     ) {
         item {
             Column {
-                Row(verticalAlignment = Alignment.Bottom) {
+                // Settings sits up on the title line rather than at the end of the
+                // shelf row: it is the one destination nobody wants to walk past
+                // seven other buttons to reach.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = "Karaoke",
                         style = MaterialTheme.typography.displayMedium,
@@ -113,6 +120,8 @@ fun HomeScreen(
                         style = MaterialTheme.typography.titleMedium,
                         color = KaraokeColors.Muted,
                     )
+                    Spacer(Modifier.weight(1f))
+                    TvButton("Cài đặt", actions.onSettings, icon = Icons.Filled.Settings)
                 }
                 Spacer(Modifier.height(20.dp))
                 // Scrolls, but as a plain Row: eight buttons do not fit 1920px, and a
@@ -143,7 +152,6 @@ fun HomeScreen(
                     TvButton("Tất cả bài", actions.onAllSongs, icon = Icons.Filled.LibraryMusic)
                     TvButton("Yêu thích", actions.onFavorites, icon = Icons.Filled.Mic)
                     TvButton("Ngẫu nhiên", actions.onShuffle, icon = Icons.Filled.Casino)
-                    TvButton("Cài đặt", actions.onSettings, icon = Icons.Filled.Settings)
                 }
             }
         }

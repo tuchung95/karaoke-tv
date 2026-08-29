@@ -85,6 +85,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.tv.material)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.video)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.media3.exoplayer)

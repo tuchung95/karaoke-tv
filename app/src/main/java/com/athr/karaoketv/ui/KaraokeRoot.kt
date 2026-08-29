@@ -39,6 +39,8 @@ import com.athr.karaoketv.ui.setup.SetupScreen
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import kotlinx.coroutines.delay
 
+private const val SEEK_STEP_MS = 10_000L
+
 /**
  * The whole app in one place. The video is the bottom layer and never stops for
  * navigation; the browser floats over it with a scrim, and BACK peels the layers
@@ -181,9 +183,24 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                             return@onPreviewKeyEvent false
                         }
                         when (event.nativeKeyEvent.keyCode) {
-                            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER,
-                            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_MENU,
-                            -> {
+                            // TV-PC: on a TV the centre key means play/pause and
+                            // left/right mean seek. The transport bar moves to DOWN.
+                            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                                player.togglePlayPause()
+                                hudVisible = true
+                                true
+                            }
+                            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MEDIA_REWIND -> {
+                                player.seekBy(-SEEK_STEP_MS)
+                                hudVisible = true
+                                true
+                            }
+                            KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
+                                player.seekBy(SEEK_STEP_MS)
+                                hudVisible = true
+                                true
+                            }
+                            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_MENU -> {
                                 controlsVisible = true
                                 hudVisible = true
                                 true

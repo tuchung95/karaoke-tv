@@ -130,6 +130,26 @@ Script tăng versionCode (bắt buộc, thiếu là Android từ chối cài đ�
 ký, gắn thẻ, đẩy lên và đính APK vào release. Bản mới **phải ký bằng đúng keystore
 cũ**, nếu không sẽ không cài đè được.
 
+## Đối chiếu chuẩn chất lượng app TV của Google
+
+Soát theo [TV app quality](https://developer.android.com/docs/quality-guidelines/tv-app-quality),
+mức Tier 3 (TV Ready) — mức bắt buộc:
+
+| Mã | Yêu cầu | Trạng thái |
+|---|---|---|
+| TV-LM, TV-ML | Hiện trong launcher qua `LEANBACK_LAUNCHER` | Đạt |
+| TV-LB, TV-BN | Banner 320×180 **có tên app**, icon 160×160 | Đã sửa — banner cũ chỉ có hình, không có chữ |
+| TV-LO, TV-TR | Ngang, phủ kín màn hình, nền đục | Đạt |
+| TV-OV | Không có gì bị cắt ở mép | Đã sửa — dòng full-width khi focus bị phóng to lấn vào vùng overscan |
+| TV-DP, TV-DM | Điều khiển hoàn toàn bằng D-pad, không phụ thuộc phím Menu | Đạt |
+| TV-DB | BACK dẫn về màn hình chính của TV | Đạt (bấm hai lần để tránh thoát nhầm) |
+| TV-PS, TV-MT | minSdk ≤ 31, không đòi cảm ứng | Đạt (minSdk 26) |
+| TV-PC | Phím giữa = phát/dừng, trái/phải = tua | Đã sửa — trước đó phím giữa mở thanh điều khiển |
+| TV-PP | Phím PLAY/PAUSE đổi trạng thái phát | Đạt |
+| TV-NP | Không phát tiếp khi rời app mà không có điều khiển hệ thống | Đã sửa — giờ dừng ở `onStop` |
+| TV-BU, TV-BY | Chỉ chặn Ambient Mode khi đang phát | Đã sửa — trước đó giữ màn hình sáng vô điều kiện |
+| TV-WB, TV-AP…TV-AA, TV-IC…TV-IX, TV-LG, TV-GP | Web, quảng cáo, PiP, game | Không áp dụng |
+
 ## Bố cục và giao diện
 
 Dựng trên **Compose for TV Material** (`androidx.tv:tv-material`) — design system

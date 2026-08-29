@@ -43,6 +43,7 @@ import com.athr.karaoketv.ui.ScanState
 import com.athr.karaoketv.ui.components.RequestInitialFocus
 import com.athr.karaoketv.ui.components.TvButton
 import androidx.tv.material3.ListItem
+import com.athr.karaoketv.ui.components.fullWidthRowScale
 import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
@@ -235,6 +236,7 @@ fun SetupScreen(
                         onClick = { chooseVolume(volume) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = karaokeListItemColors(),
+                        scale = fullWidthRowScale(),
                         leadingContent = {
                             Icon(Icons.Filled.Usb, contentDescription = null)
                         },

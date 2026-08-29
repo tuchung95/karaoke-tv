@@ -2,6 +2,11 @@ package com.athr.karaoketv.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,31 +45,39 @@ fun SongCard(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = modifier.width(TvSpacing.CardWidth3Up),
+        contentPadding = PaddingValues(0.dp),
         focusRequester = focusRequester,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.MusicNote,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-            )
-            Spacer(Modifier.width(8.dp))
-            if (song.songNumber != null) {
-                Pill(song.songNumber)
-                Spacer(Modifier.width(6.dp))
+        SongThumbnail(
+            uri = song.uri,
+            modifier = Modifier
+                .fillMaxWidth()
+                // 16:9, the aspect every karaoke rip and every TV shares.
+                .height(TvSpacing.CardWidth3Up * 9 / 16),
+        )
+        Column(Modifier.padding(14.dp)) {
+        // Only when there is something to show — the thumbnail already says
+        // "this is a song", so an icon row here would just cost a line of height.
+        val hasBadges = song.songNumber != null || song.tone != null || song.favorite
+        if (hasBadges) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (song.songNumber != null) {
+                    Pill(song.songNumber)
+                    Spacer(Modifier.width(6.dp))
+                }
+                if (song.tone != null) Pill(song.tone, color = KaraokeColors.Primary)
+                if (song.favorite) {
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = null,
+                        tint = KaraokeColors.Primary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
             }
-            if (song.tone != null) Pill(song.tone, color = KaraokeColors.Primary)
-            if (song.favorite) {
-                Spacer(Modifier.width(6.dp))
-                Icon(
-                    Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = KaraokeColors.Primary,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            Spacer(Modifier.height(8.dp))
         }
-        Spacer(Modifier.height(10.dp))
         Text(
             text = song.title,
             style = MaterialTheme.typography.titleMedium,
@@ -73,7 +85,6 @@ fun SongCard(
             overflow = TextOverflow.Ellipsis,
             // Min, not fixed: the TV type scale is larger than the phone one and a
             // hard height clips two-line titles.
-            modifier = Modifier.heightIn(min = 64.dp),
         )
         Text(
             text = song.artist ?: song.collection ?: "—",
@@ -82,6 +93,7 @@ fun SongCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        }
     }
 }
 
@@ -103,12 +115,23 @@ fun SongRow(
             .fillMaxWidth()
             .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
         colors = karaokeListItemColors(),
+        scale = fullWidthRowScale(),
         leadingContent = {
-            Text(
-                text = song.songNumber ?: ordinal?.toString() ?: "",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.width(64.dp),
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = song.songNumber ?: ordinal?.toString() ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.width(64.dp),
+                )
+                SongThumbnail(
+                    uri = song.uri,
+                    iconSize = 18,
+                    modifier = Modifier
+                        .size(width = 80.dp, height = 45.dp)
+                        .clip(RoundedCornerShape(6.dp)),
+                )
+                Spacer(Modifier.width(16.dp))
+            }
         },
         headlineContent = {
             Text(
@@ -181,6 +204,17 @@ fun GroupCard(
         )
     }
 }
+
+/**
+ * Full-width rows do not grow on focus.
+ *
+ * The design system scales a focused item up, which is right for a card with room
+ * around it. A row already spanning the safe area has nowhere to grow into: it
+ * lands in the overscan margin, where a TV's bezel can crop it. The colour
+ * inversion carries the focus state on its own here.
+ */
+@Composable
+fun fullWidthRowScale() = ListItemDefaults.scale(focusedScale = 1f)
 
 /** Shared list-row colours, so every list in the app reads the same. */
 @Composable

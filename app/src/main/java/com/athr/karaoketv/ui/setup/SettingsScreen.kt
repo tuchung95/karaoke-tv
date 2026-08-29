@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.TvButton
 import androidx.tv.material3.ListItem
 import androidx.tv.material3.Switch
+import com.athr.karaoketv.ui.components.fullWidthRowScale
 import com.athr.karaoketv.ui.components.karaokeListItemColors
 import com.athr.karaoketv.ui.theme.KaraokeColors
 import com.athr.karaoketv.ui.theme.TvSpacing
@@ -92,6 +94,7 @@ fun SettingsScreen(
             }
         }
 
+        groupHeader("Màn hình chính")
         item {
             SettingRow(
                 title = "Bố cục màn hình chính",
@@ -101,6 +104,8 @@ fun SettingsScreen(
                 onClick = onOpenHomeLayout,
             )
         }
+
+        groupHeader("Phát nhạc")
         item {
             SettingRow(
                 title = "Tự động hát bài kế",
@@ -121,19 +126,6 @@ fun SettingsScreen(
                 onClick = onToggleNextUpBanner,
             )
         }
-        if (youTubeAvailable) {
-            item {
-                SettingRow(
-                    title = "Thêm \"karaoke\" khi tìm trên YouTube",
-                    description = "Gõ \"gần như là\" sẽ tìm \"gần như là karaoke\". " +
-                        "Bài mở bằng app YouTube — đăng nhập Premium ở đó thì không quảng cáo.",
-                    value = if (appendKaraokeToYouTube) "Bật" else "Tắt",
-                    highlighted = appendKaraokeToYouTube,
-                    checked = appendKaraokeToYouTube,
-                    onClick = onToggleYouTubeKeyword,
-                )
-            }
-        }
         item {
             SettingRow(
                 title = "Tỉ lệ khung hình",
@@ -152,6 +144,23 @@ fun SettingsScreen(
                 onClick = onResetPitch,
             )
         }
+
+        if (youTubeAvailable) {
+            groupHeader("YouTube")
+            item {
+                SettingRow(
+                    title = "Thêm \"karaoke\" khi tìm trên YouTube",
+                    description = "Gõ \"gần như là\" sẽ tìm \"gần như là karaoke\". " +
+                        "Bài mở bằng app YouTube — đăng nhập Premium ở đó thì không quảng cáo.",
+                    value = if (appendKaraokeToYouTube) "Bật" else "Tắt",
+                    highlighted = appendKaraokeToYouTube,
+                    checked = appendKaraokeToYouTube,
+                    onClick = onToggleYouTubeKeyword,
+                )
+            }
+        }
+
+        groupHeader("Ứng dụng")
         item {
             SettingRow(
                 title = "Phiên bản $currentVersion",
@@ -173,6 +182,18 @@ fun SettingsScreen(
                 onClick = onClearLibrary,
             )
         }
+    }
+}
+
+/** A labelled break between settings, so the list is scannable from the sofa. */
+private fun LazyListScope.groupHeader(title: String) {
+    item(key = "group-$title") {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = KaraokeColors.Accent,
+            modifier = Modifier.padding(top = 20.dp, bottom = 4.dp, start = 8.dp),
+        )
     }
 }
 
@@ -220,6 +241,7 @@ private fun SettingRow(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = karaokeListItemColors(),
+        scale = fullWidthRowScale(),
         headlineContent = {
             Text(
                 text = title,
