@@ -66,10 +66,17 @@ gh release create "v$VERSION" "/tmp/$APK_NAME" \
   --title "Karaoke TV $VERSION" \
   --notes "${NOTES:-Bản $VERSION}"
 
-cp "/tmp/$APK_NAME" "$HOME/Desktop/$APK_NAME"
+# Chỉ giữ bản mới nhất trên trang phát hành. Thẻ git thì giữ nguyên: chúng không
+# tốn chỗ và vẫn cho phép dựng lại bất kỳ phiên bản nào.
+say "Dọn các bản phát hành cũ"
+for old in $(gh release list --limit 100 --json tagName -q '.[].tagName'); do
+  if [ "$old" != "v$VERSION" ]; then
+    gh release delete "$old" --yes >/dev/null 2>&1 && echo "  đã xoá $old"
+  fi
+done
 
 say "Xong"
-echo "  APK:  ~/Desktop/$APK_NAME"
+echo "  APK:  /tmp/$APK_NAME"
 echo "  Trang: $(gh repo view --json url -q .url)/releases/tag/v$VERSION"
 echo
 echo "  Trên box: Cài đặt -> Phiên bản -> Kiểm tra -> Tải về -> Cài đặt"

@@ -67,9 +67,24 @@ fun SongListScreen(
     onSongOptions: (SongEntity) -> Unit,
     modifier: Modifier = Modifier,
     onReachEnd: (() -> Unit)? = null,
+    emptyMessage: String? = null,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         ScreenTitle(title, "${formatCount(songs.size)} bài")
+
+        if (songs.isEmpty() && emptyMessage != null) {
+            // A blank list tells nobody how to stop it being blank.
+            Text(
+                text = emptyMessage,
+                style = MaterialTheme.typography.titleMedium,
+                color = KaraokeColors.Muted,
+                modifier = Modifier.padding(
+                    start = TvSpacing.ScreenHorizontal,
+                    end = TvSpacing.ScreenHorizontal,
+                ),
+            )
+            return@Column
+        }
         LazyColumn(
             contentPadding = PaddingValues(
                 start = TvSpacing.ScreenHorizontal,

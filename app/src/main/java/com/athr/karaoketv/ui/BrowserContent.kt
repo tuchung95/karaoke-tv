@@ -340,6 +340,14 @@ private fun SongListRoute(
         onSongClick = onSongSelected,
         onSongOptions = onSongOptions,
         onReachEnd = if (pages) loadNextPage else null,
+        emptyMessage = when (screen.source) {
+            SongListSource.Favorites ->
+                "Chưa có bài yêu thích nào.\n\n" +
+                    "Giữ OK trên một bài rồi chọn \"Thêm vào yêu thích\", hoặc bấm " +
+                    "nút hình trái tim ở góc trên khi đang hát bài đó."
+            SongListSource.MostPlayed -> "Chưa hát bài nào."
+            else -> "Không có bài nào ở đây."
+        },
     )
 }
 

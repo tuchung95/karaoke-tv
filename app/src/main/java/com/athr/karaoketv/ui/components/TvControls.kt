@@ -47,7 +47,10 @@ fun TvButton(
             containerColor = KaraokeColors.Primary,
             contentColor = KaraokeColors.OnPrimary,
             focusedContainerColor = KaraokeColors.OnSurface,
-            focusedContentColor = KaraokeColors.Primary,
+            // Dark on the light focused fill. Using the accent here put a light
+            // lavender label on a near-white button — the same shape of mistake as
+            // the tab pill, and just as unreadable.
+            focusedContentColor = KaraokeColors.OnPrimary,
         )
     } else {
         ButtonDefaults.colors(
