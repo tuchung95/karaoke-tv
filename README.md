@@ -132,9 +132,20 @@ cũ**, nếu không sẽ không cài đè được.
 
 ## Bố cục và giao diện
 
+Dựng trên **Compose for TV Material** (`androidx.tv:tv-material`) — design system
+chính chủ của Google cho TV — chứ không phải Material3 của điện thoại. Nghĩa là
+hiệu ứng focus (phóng to, viền, quầng sáng) và thang chữ 10-foot lấy thẳng từ thư
+viện, không phải số tôi tự đặt; app focus trông giống mọi app Android TV khác.
+Chỉ bảng màu là riêng.
+
 Theo [hướng dẫn thiết kế Android TV](https://developer.android.com/design/ui/tv):
 khung 960×540dp, lề an toàn 58dp hai bên và 28dp trên dưới, lưới 12 cột với gutter
 20dp — 844dp nội dung chia vừa đúng 3 thẻ bài hát (268dp) hoặc 4 thẻ nhóm (196dp).
+
+Ba nguyên tắc TV của Google được áp dụng cụ thể: **10-foot UI** (thang chữ TV, ít
+chữ, phân cấp rõ), **điều hướng D-pad** (mọi thứ bấm được đều có focus thấy rõ, focus
+ban đầu luôn được đặt sẵn nên cú bấm đầu tiên không bị mất), và **thiết bị dùng
+chung** (Bố cục màn hình chính cho ẩn các hàng lịch sử hát khi cả nhà dùng chung box).
 
 Màn hình chính tuỳ chỉnh được: Cài đặt → **Bố cục màn hình chính** cho phép ẩn/hiện
 và đổi thứ tự từng hàng (Đang chờ, Hát gần đây, Yêu thích, Hát nhiều nhất, Thể loại,

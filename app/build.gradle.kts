@@ -52,6 +52,9 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        // Compose for TV's components are still marked experimental; opting in once
+        // here beats annotating every screen.
+        freeCompilerArgs += "-opt-in=androidx.tv.material3.ExperimentalTvMaterial3Api"
     }
 
     buildFeatures {
@@ -81,6 +84,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.tv.material)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.media3.exoplayer)

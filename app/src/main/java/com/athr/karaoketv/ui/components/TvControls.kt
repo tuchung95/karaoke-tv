@@ -1,11 +1,7 @@
 package com.athr.karaoketv.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -16,15 +12,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -32,15 +24,20 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Border
+import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
+import androidx.tv.material3.Text
 import com.athr.karaoketv.ui.theme.KaraokeColors
 
 /**
- * The one focusable primitive the whole app is built from. A TV has no cursor, so
- * focus has to be unmistakable: the card grows, brightens, and gains a coloured
- * ring. Everything clickable in this app uses this so focus reads identically
- * across the home rows, the keyboard and the transport bar.
+ * The one focusable primitive the whole app is built from, on Compose for TV's
+ * [Surface]. Focus scale, the border and the glow behind a focused item come from
+ * the TV design system's own defaults rather than values guessed here, so focus
+ * reads the same in this app as in every other Android TV app.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TvFocusable(
     onClick: () -> Unit,
@@ -50,34 +47,40 @@ fun TvFocusable(
     containerColor: Color = KaraokeColors.Surface,
     focusedContainerColor: Color = KaraokeColors.SurfaceHigh,
     focusRing: Color = KaraokeColors.Primary,
-    focusScale: Float = 1.05f,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
     focusRequester: FocusRequester? = null,
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(if (focused) focusScale else 1f, label = "focusScale")
 
-    Box(
-        modifier = modifier
-            .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
-            .scale(scale)
-            .background(if (focused) focusedContainerColor else containerColor, shape)
-            .border(
-                BorderStroke(if (focused) 3.dp else 1.dp, if (focused) focusRing else KaraokeColors.Divider),
-                shape,
-            )
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick,
-            )
-            .padding(contentPadding),
-        contentAlignment = Alignment.CenterStart,
+    Surface(
+        onClick = onClick,
+        onLongClick = onLongClick,
+        interactionSource = interactionSource,
+        modifier = modifier.then(
+            focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier
+        ),
+        shape = ClickableSurfaceDefaults.shape(shape = shape),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = containerColor,
+            focusedContainerColor = focusedContainerColor,
+            pressedContainerColor = focusedContainerColor,
+            contentColor = KaraokeColors.OnSurface,
+            focusedContentColor = KaraokeColors.OnSurface,
+            pressedContentColor = KaraokeColors.OnSurface,
+        ),
+        border = ClickableSurfaceDefaults.border(
+            border = Border(BorderStroke(1.dp, KaraokeColors.Divider), shape = shape),
+            focusedBorder = Border(BorderStroke(3.dp, focusRing), shape = shape),
+        ),
     ) {
-        content(focused)
+        Box(
+            modifier = Modifier.padding(contentPadding),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            content(focused)
+        }
     }
 }
 
@@ -129,10 +132,7 @@ fun SectionHeader(
     modifier: Modifier = Modifier,
     trailing: String? = null,
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,

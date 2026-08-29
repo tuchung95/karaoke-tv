@@ -1,19 +1,15 @@
 package com.athr.karaoketv.ui.theme
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.darkColorScheme
 
 /**
- * A living room is dark and the viewer is three metres away, so the palette is
- * dark-only and the type scale is roughly 1.4x the phone defaults. Every value
- * here was picked to stay readable over a moving karaoke video.
+ * Built on Compose for TV's Material design system rather than the phone one, so
+ * focus scale, borders, glow and the type scale are Google's TV values rather than
+ * numbers picked here. Only the palette is ours.
  */
 object KaraokeColors {
     val Background = Color(0xFF07090D)
@@ -41,21 +37,8 @@ private val TvColorScheme = darkColorScheme(
     onSurface = KaraokeColors.OnSurface,
     surfaceVariant = KaraokeColors.SurfaceHigh,
     onSurfaceVariant = KaraokeColors.Muted,
-    outline = KaraokeColors.Divider,
+    border = KaraokeColors.Divider,
     error = KaraokeColors.Danger,
-)
-
-private val TvTypography = Typography(
-    displayLarge = TextStyle(fontSize = 48.sp, lineHeight = 56.sp, fontWeight = FontWeight.Bold),
-    displayMedium = TextStyle(fontSize = 40.sp, lineHeight = 48.sp, fontWeight = FontWeight.Bold),
-    headlineLarge = TextStyle(fontSize = 34.sp, lineHeight = 42.sp, fontWeight = FontWeight.Bold),
-    headlineMedium = TextStyle(fontSize = 28.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold),
-    titleLarge = TextStyle(fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.SemiBold),
-    titleMedium = TextStyle(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium),
-    bodyLarge = TextStyle(fontSize = 19.sp, lineHeight = 26.sp),
-    bodyMedium = TextStyle(fontSize = 17.sp, lineHeight = 24.sp),
-    labelLarge = TextStyle(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium),
-    labelMedium = TextStyle(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
 )
 
 /**
@@ -81,7 +64,6 @@ object TvSpacing {
 fun KaraokeTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = TvColorScheme,
-        typography = TvTypography,
         content = content,
     )
 }

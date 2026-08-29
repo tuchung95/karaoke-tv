@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,9 +16,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,7 +77,9 @@ fun SongCard(
                 color = KaraokeColors.OnSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.height(56.dp),
+                // Min, not fixed: the TV type scale is larger than the phone one
+                // and a hard height clips two-line titles.
+                modifier = Modifier.heightIn(min = 64.dp),
             )
             Text(
                 text = song.artist ?: song.collection ?: "—",
@@ -181,7 +184,9 @@ fun GroupCard(
                 color = KaraokeColors.OnSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.height(56.dp),
+                // Min, not fixed: the TV type scale is larger than the phone one
+                // and a hard height clips two-line titles.
+                modifier = Modifier.heightIn(min = 64.dp),
             )
             Text(
                 text = "$songCount bài",

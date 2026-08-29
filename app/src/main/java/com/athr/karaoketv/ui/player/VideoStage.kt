@@ -16,8 +16,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
 import com.athr.karaoketv.ui.theme.KaraokeColors
 
 /**
