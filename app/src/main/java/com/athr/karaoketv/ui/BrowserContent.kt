@@ -3,6 +3,7 @@ package com.athr.karaoketv.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import com.athr.karaoketv.ui.browse.SongListScreen
 import com.athr.karaoketv.ui.home.HomeActions
 import com.athr.karaoketv.ui.home.HomeScreen
 import com.athr.karaoketv.ui.home.HomeShelves
+import com.athr.karaoketv.ui.components.ScreenNavBar
 import com.athr.karaoketv.ui.queue.QueueScreen
 import com.athr.karaoketv.ui.search.SearchScreen
 import com.athr.karaoketv.ui.setup.SettingsScreen
@@ -44,16 +46,30 @@ fun BrowserContent(
     onSongSelected: (SongEntity) -> Unit,
     onSongOptions: (SongEntity) -> Unit,
     onOpenSetup: () -> Unit,
+    onBack: () -> Unit,
+    onHome: () -> Unit,
+    onWatchVideo: (() -> Unit)?,
 ) {
     Box(Modifier.fillMaxSize()) {
-        when (screen) {
-            Screen.Home -> HomeRoute(vm, onNavigate, onSongSelected, onSongOptions, onOpenSetup)
-            Screen.Search -> SearchRoute(vm, onSongSelected, onSongOptions)
-            Screen.Categories -> CategoriesRoute(vm, onNavigate)
-            Screen.Artists -> ArtistsRoute(vm, onNavigate)
-            Screen.Queue -> QueueRoute(vm)
-            Screen.Settings -> SettingsRoute(vm, onOpenSetup)
-            is Screen.SongList -> SongListRoute(vm, screen, onSongSelected, onSongOptions)
+        Column(Modifier.fillMaxSize()) {
+            // Home is the root: nothing to go back to, and it already carries its
+            // own button row.
+            if (screen != Screen.Home) {
+                ScreenNavBar(onBack = onBack, onHome = onHome, onWatchVideo = onWatchVideo)
+            }
+            Box(Modifier.weight(1f)) {
+                when (screen) {
+                    Screen.Home ->
+                        HomeRoute(vm, onNavigate, onSongSelected, onSongOptions, onOpenSetup)
+                    Screen.Search -> SearchRoute(vm, onSongSelected, onSongOptions)
+                    Screen.Categories -> CategoriesRoute(vm, onNavigate)
+                    Screen.Artists -> ArtistsRoute(vm, onNavigate)
+                    Screen.Queue -> QueueRoute(vm)
+                    Screen.Settings -> SettingsRoute(vm, onOpenSetup)
+                    is Screen.SongList ->
+                        SongListRoute(vm, screen, onSongSelected, onSongOptions)
+                }
+            }
         }
         KeyHints(modifier = Modifier.align(Alignment.BottomEnd))
     }
@@ -187,6 +203,7 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
     val songCount by vm.songCount.collectAsStateWithLifecycle()
     val scanState by vm.scanState.collectAsStateWithLifecycle()
     val scaleMode by vm.player.scaleMode.collectAsStateWithLifecycle()
+    val updateState by vm.updateState.collectAsStateWithLifecycle()
     val pitch by vm.player.pitchSemitones.collectAsStateWithLifecycle()
     var autoNext by remember { mutableStateOf(vm.prefs.autoNext) }
     var nextUpBanner by remember { mutableStateOf(vm.prefs.showNextUpBanner) }
@@ -202,6 +219,8 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
         nextUpBanner = nextUpBanner,
         appendKaraokeToYouTube = youTubeKeyword,
         youTubeAvailable = youTubeAvailable,
+        currentVersion = vm.currentVersion,
+        updateState = updateState,
         scaleModeLabel = when (scaleMode) {
             1 -> "Phóng to"
             2 -> "Kéo đầy"
@@ -225,6 +244,14 @@ private fun SettingsRoute(vm: KaraokeViewModel, onOpenSetup: () -> Unit) {
         onCycleScale = vm.player::cycleScaleMode,
         onResetPitch = { vm.player.setPitch(0) },
         onClearLibrary = onOpenSetup,
+        onUpdateAction = {
+            when (updateState) {
+                is UpdateState.Available -> vm.downloadUpdate(context)
+                is UpdateState.Ready -> vm.installUpdate(context)
+                is UpdateState.Downloading, is UpdateState.Checking -> Unit
+                else -> vm.checkForUpdate()
+            }
+        },
     )
 }
 

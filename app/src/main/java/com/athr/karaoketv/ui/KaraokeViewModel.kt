@@ -4,10 +4,13 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.athr.karaoketv.BuildConfig
 import com.athr.karaoketv.KaraokeApp
 import com.athr.karaoketv.data.db.SongEntity
 import com.athr.karaoketv.data.library.LibrarySource
 import com.athr.karaoketv.data.library.ScanProgress
+import com.athr.karaoketv.data.update.ApkInstaller
+import com.athr.karaoketv.data.update.UpdateChecker
 import com.athr.karaoketv.data.youtube.YouTubeLauncher
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -19,6 +22,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+/** Where the sideloaded app is in the check -> download -> install cycle. */
+sealed interface UpdateState {
+    data object Idle : UpdateState
+    data object Checking : UpdateState
+    data object UpToDate : UpdateState
+    data class Available(val release: UpdateChecker.Release) : UpdateState
+    data class Downloading(val percent: Int) : UpdateState
+    data class Ready(val apk: java.io.File, val versionName: String) : UpdateState
+    data class Failed(val message: String) : UpdateState
+}
 
 sealed interface ScanState {
     data object Idle : ScanState
@@ -61,6 +75,12 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
     val scanState: kotlinx.coroutines.flow.StateFlow<ScanState> = _scanState.asStateFlow()
 
     private var scanJob: Job? = null
+    private var updateJob: Job? = null
+
+    private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
+    val updateState: kotlinx.coroutines.flow.StateFlow<UpdateState> = _updateState.asStateFlow()
+
+    val currentVersion: String = BuildConfig.VERSION_NAME
 
     val libraryConfigured: Boolean get() = prefs.libraryConfigured
     val libraryLabel: String get() = prefs.libraryLabel
@@ -138,6 +158,64 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
         if (query.isBlank()) return false
         player.player.pause()
         return YouTubeLauncher.openSearch(context, query, prefs.appendKaraokeToYouTube)
+    }
+
+    // ---- updates ------------------------------------------------------------
+
+    fun checkForUpdate() {
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
+            _updateState.value = UpdateState.Checking
+            _updateState.value = try {
+                val release = UpdateChecker.fetchLatest()
+                when {
+                    release == null -> UpdateState.Failed("Chưa có bản phát hành nào")
+                    UpdateChecker.isNewer(release.versionName, currentVersion) ->
+                        UpdateState.Available(release)
+                    else -> UpdateState.UpToDate
+                }
+            } catch (e: Exception) {
+                UpdateState.Failed("Không kiểm tra được: cần mạng")
+            }
+        }
+    }
+
+    fun downloadUpdate(context: android.content.Context) {
+        val available = _updateState.value as? UpdateState.Available ?: return
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
+            _updateState.value = UpdateState.Downloading(0)
+            _updateState.value = try {
+                val apk = ApkInstaller.download(context, available.release.apkUrl) { percent ->
+                    _updateState.value = UpdateState.Downloading(percent)
+                }
+                UpdateState.Ready(apk, available.release.versionName)
+            } catch (e: Exception) {
+                UpdateState.Failed("Tải bản cập nhật thất bại")
+            }
+        }
+    }
+
+    /**
+     * Hands the APK to the system installer, first sending the viewer to grant
+     * install permission if the box has not trusted this app yet.
+     */
+    fun installUpdate(context: android.content.Context) {
+        val ready = _updateState.value as? UpdateState.Ready ?: return
+        if (!ApkInstaller.canInstall(context)) {
+            val intent = ApkInstaller.installPermissionIntent(context)
+            if (intent == null) {
+                _updateState.value =
+                    UpdateState.Failed("Máy không có màn hình cấp quyền cài đặt")
+            } else {
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }
+            return
+        }
+        if (!ApkInstaller.install(context, ready.apk)) {
+            _updateState.value = UpdateState.Failed("Không mở được trình cài đặt")
+        }
     }
 
     fun shuffleIntoQueue(count: Int = 10) {

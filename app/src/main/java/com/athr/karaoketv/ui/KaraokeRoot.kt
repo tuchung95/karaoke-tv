@@ -263,6 +263,17 @@ fun KaraokeRoot(vm: KaraokeViewModel, onExit: () -> Unit) {
                     onSongSelected = { song -> player.enqueue(song) },
                     onSongOptions = { song -> actionSheetSong = song },
                     onOpenSetup = { setupVisible = true },
+                    onBack = {
+                        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                    },
+                    onHome = {
+                        if (backStack.size > 1) backStack.removeRange(1, backStack.size)
+                    },
+                    onWatchVideo = if (current != null) {
+                        { browserVisible = false }
+                    } else {
+                        null
+                    },
                 )
             }
         }

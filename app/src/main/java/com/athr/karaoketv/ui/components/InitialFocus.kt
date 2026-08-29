@@ -2,6 +2,7 @@ package com.athr.karaoketv.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.focus.FocusRequester
 import kotlinx.coroutines.delay
 
@@ -17,14 +18,19 @@ import kotlinx.coroutines.delay
 @Composable
 fun RequestInitialFocus(focusRequester: FocusRequester, key: Any? = Unit) {
     LaunchedEffect(key) {
-        repeat(ATTEMPTS) {
-            if (runCatching { focusRequester.requestFocus() }.isSuccess) {
-                return@LaunchedEffect
-            }
-            delay(RETRY_DELAY_MS)
+        // Wait for the first frame: before it, the node is not attached and the
+        // request throws.
+        withFrameNanos { }
+        // Then claim focus a few times over the next moment. One successful call
+        // is not enough — Compose may hand initial focus to some other child just
+        // after, which is how the home row ended up focusing a middle button and
+        // scrolling itself sideways on launch.
+        repeat(ATTEMPTS) { attempt ->
+            runCatching { focusRequester.requestFocus() }
+            if (attempt < ATTEMPTS - 1) delay(RETRY_DELAY_MS)
         }
     }
 }
 
-private const val ATTEMPTS = 15
-private const val RETRY_DELAY_MS = 40L
+private const val ATTEMPTS = 4
+private const val RETRY_DELAY_MS = 120L

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.athr.karaoketv.ui.ScanState
+import com.athr.karaoketv.ui.UpdateState
 import com.athr.karaoketv.ui.components.Pill
 import com.athr.karaoketv.ui.components.TvButton
 import com.athr.karaoketv.ui.components.TvFocusable
@@ -34,6 +35,8 @@ fun SettingsScreen(
     nextUpBanner: Boolean,
     appendKaraokeToYouTube: Boolean,
     youTubeAvailable: Boolean,
+    currentVersion: String,
+    updateState: UpdateState,
     scaleModeLabel: String,
     pitchSemitones: Int,
     onChangeLibrary: () -> Unit,
@@ -44,6 +47,7 @@ fun SettingsScreen(
     onCycleScale: () -> Unit,
     onResetPitch: () -> Unit,
     onClearLibrary: () -> Unit,
+    onUpdateAction: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -134,6 +138,16 @@ fun SettingsScreen(
         }
         item {
             SettingRow(
+                title = "Phiên bản $currentVersion",
+                description = updateDescription(updateState),
+                value = updateAction(updateState),
+                highlighted = updateState is UpdateState.Available ||
+                    updateState is UpdateState.Ready,
+                onClick = onUpdateAction,
+            )
+        }
+        item {
+            SettingRow(
                 title = "Xóa dữ liệu thư viện",
                 description = "Xóa danh mục đã quét, không đụng tới file trên ổ cứng",
                 value = "Xóa",
@@ -143,6 +157,31 @@ fun SettingsScreen(
             )
         }
     }
+}
+
+private fun updateDescription(state: UpdateState): String = when (state) {
+    is UpdateState.Idle -> "Tải bản mới từ GitHub và cài đè lên bản đang dùng"
+    is UpdateState.Checking -> "Đang kiểm tra…"
+    is UpdateState.UpToDate -> "Đang dùng bản mới nhất"
+    is UpdateState.Available ->
+        "Có bản ${state.release.versionName}" +
+            state.release.notes.lineSequence().firstOrNull()
+                ?.takeIf { it.isNotBlank() }
+                ?.let { " — $it" }
+                .orEmpty()
+    is UpdateState.Downloading -> "Đang tải… ${state.percent}%"
+    is UpdateState.Ready -> "Đã tải bản ${state.versionName}, bấm để cài"
+    is UpdateState.Failed -> state.message
+}
+
+private fun updateAction(state: UpdateState): String = when (state) {
+    is UpdateState.Idle -> "Kiểm tra"
+    is UpdateState.Checking -> "…"
+    is UpdateState.UpToDate -> "Mới nhất"
+    is UpdateState.Available -> "Tải về"
+    is UpdateState.Downloading -> "${state.percent}%"
+    is UpdateState.Ready -> "Cài đặt"
+    is UpdateState.Failed -> "Thử lại"
 }
 
 @Composable

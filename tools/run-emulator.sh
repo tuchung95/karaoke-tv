@@ -30,6 +30,15 @@ if ! "$EMULATOR" -list-avds | grep -qx "$AVD_NAME"; then
     -n "$AVD_NAME" -k "$SYSTEM_IMAGE" -d tv_1080p --force >/dev/null
 fi
 
+# Máy ảo TV mặc định tắt bàn phím cứng, khi đó gõ chữ từ bàn phím laptop
+# không tới được app (phím mũi tên/Enter/Esc vẫn chạy vì là nút giả lập).
+AVD_CONFIG="$HOME/.android/avd/$AVD_NAME.avd/config.ini"
+if [ -f "$AVD_CONFIG" ] && ! grep -q '^hw.keyboard = yes' "$AVD_CONFIG"; then
+  say "Bật bàn phím cứng cho máy ảo"
+  /usr/bin/sed -i '' 's/^hw.keyboard = .*/hw.keyboard = yes/' "$AVD_CONFIG"
+  grep -q '^hw.keyboard' "$AVD_CONFIG" || echo 'hw.keyboard = yes' >> "$AVD_CONFIG"
+fi
+
 if ! "$ADB" devices | grep -q "^emulator-.*device$"; then
   say "Khởi động emulator (cửa sổ sẽ hiện ra)"
   # nohup + disown: nếu không, emulator chết theo shell vừa gọi script.

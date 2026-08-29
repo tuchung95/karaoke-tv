@@ -3,6 +3,8 @@ package com.athr.karaoketv.ui.search
 import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,7 +78,14 @@ fun SearchScreen(
                 vertical = TvSpacing.ScreenVertical,
             ),
     ) {
-        Column(Modifier.width(440.dp).fillMaxHeight()) {
+        Column(
+            Modifier
+                .width(440.dp)
+                .fillMaxHeight()
+                // The nav bar above costs vertical room; scrolling guarantees the
+                // space and delete keys stay reachable on shorter panels.
+                .verticalScroll(rememberScrollState())
+        ) {
             QueryDisplay(query = query, listening = voice.listening)
             Spacer(Modifier.height(16.dp))
             TvButton(
@@ -108,25 +117,19 @@ fun SearchScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    // Ad-free comes from the YouTube app's own account, not from us.
-                    text = "Mở bằng app YouTube trên box. Đăng nhập Premium ở đó thì " +
-                        "không quảng cáo. Bài từ YouTube không chỉnh tông hay bỏ giọng được.",
+                    // The Premium detail lives in Settings; here it would cost the
+                    // keyboard two rows of screen.
+                    text = "Phát bằng app YouTube — không chỉnh tông hay bỏ giọng được.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = KaraokeColors.Muted,
                 )
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(14.dp))
             OnScreenKeyboard(
                 onKey = onKey,
                 onBackspace = onBackspace,
                 onClear = onClear,
                 firstKeyFocus = firstKeyFocus,
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Gõ không dấu cũng ra. Nhấn giữ OK trên bài hát để có thêm lựa chọn.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = KaraokeColors.Muted,
             )
         }
 
