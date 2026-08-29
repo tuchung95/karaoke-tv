@@ -142,6 +142,12 @@ tốt hơn một khoảng trống.
 Ảnh hero tràn hết mép màn hình vì hướng dẫn Google yêu cầu phần tử nền không bị cắt
 theo vùng overscan; riêng chữ vẫn nằm trong lề an toàn.
 
+## Thanh trên
+
+Nút tròn chỉ có icon hiện nhãn khi được focus. Nhãn vẽ bằng `Popup` chứ không chiếm
+chỗ trong bố cục — nếu chiếm chỗ thì cả thanh sẽ xê dịch mỗi lần focus nhảy sang nút
+khác.
+
 ## Hàng chờ
 
 Dạng immersive list: bài mà remote đang dừng trên đó phủ kín phía sau, hàng thẻ

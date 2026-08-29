@@ -2,6 +2,15 @@ package com.athr.karaoketv.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -116,28 +125,56 @@ private fun RoundIconButton(
     highlighted: Boolean = false,
     focusRequester: FocusRequester? = null,
 ) {
-    // IconButton, not Button with zero padding: the design system sizes and centres
-    // the glyph itself, which is what the hand-rolled version was getting wrong.
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .size(IconButtonDefaults.MediumButtonSize)
-            .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
-        shape = IconButtonDefaults.shape(shape = CircleShape),
-        colors = IconButtonDefaults.colors(
-            containerColor = KaraokeColors.Surface,
-            contentColor = if (highlighted) KaraokeColors.Accent else KaraokeColors.Muted,
-            focusedContainerColor = KaraokeColors.OnSurface,
-            focusedContentColor = KaraokeColors.Background,
-        ),
-    ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            modifier = Modifier.size(IconButtonDefaults.MediumIconSize),
-        )
+    var focused by remember { mutableStateOf(false) }
+
+    Box {
+        // IconButton, not Button with zero padding: the design system sizes and
+        // centres the glyph itself, which is what the hand-rolled version got wrong.
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier
+                .size(IconButtonDefaults.MediumButtonSize)
+                .onFocusChanged { focused = it.isFocused }
+                .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier),
+            shape = IconButtonDefaults.shape(shape = CircleShape),
+            colors = IconButtonDefaults.colors(
+                containerColor = KaraokeColors.Surface,
+                contentColor = if (highlighted) KaraokeColors.Accent else KaraokeColors.Muted,
+                focusedContainerColor = KaraokeColors.OnSurface,
+                focusedContentColor = KaraokeColors.Background,
+            ),
+        ) {
+            Icon(
+                icon,
+                contentDescription = description,
+                modifier = Modifier.size(IconButtonDefaults.MediumIconSize),
+            )
+        }
+
+        if (focused) {
+            // A popup rather than a reserved row: an icon with no label is a
+            // guess, but a label that appears in the layout would shove the whole
+            // bar sideways every time focus moved.
+            Popup(
+                alignment = Alignment.BottomCenter,
+                offset = IntOffset(0, TOOLTIP_OFFSET_PX),
+            ) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = KaraokeColors.Background,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .background(KaraokeColors.OnSurface, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+            }
+        }
     }
 }
+
+/** Just clear of the button, in raw pixels as Popup offsets require. */
+private const val TOOLTIP_OFFSET_PX = 42
 
 /** Kept so the bar can sit on its own tinted band, as in the reference layout. */
 @Composable
