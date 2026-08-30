@@ -13,6 +13,8 @@ import com.athr.karaoketv.data.prefs.HomeShelf
 import com.athr.karaoketv.data.update.ApkInstaller
 import com.athr.karaoketv.data.update.UpdateChecker
 import com.athr.karaoketv.data.youtube.YouTubeLauncher
+import com.athr.karaoketv.data.youtube.YouTubeSearch
+import com.athr.karaoketv.data.youtube.YouTubeVideo
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,13 @@ sealed interface UpdateState {
     /** Downloaded, but this box has no installer UI to hand it to. */
     data class InstallManually(val path: String) : UpdateState
     data class Failed(val message: String) : UpdateState
+}
+
+sealed interface YouTubeState {
+    data object Idle : YouTubeState
+    data object Searching : YouTubeState
+    data class Results(val videos: List<YouTubeVideo>) : YouTubeState
+    data class Failed(val message: String) : YouTubeState
 }
 
 sealed interface ScanState {
@@ -84,6 +93,7 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
 
     private var scanJob: Job? = null
     private var updateJob: Job? = null
+    private var youTubeJob: Job? = null
 
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: kotlinx.coroutines.flow.StateFlow<UpdateState> = _updateState.asStateFlow()
@@ -216,6 +226,45 @@ class KaraokeViewModel(application: Application) : AndroidViewModel(application)
         if (query.isBlank()) return false
         player.player.pause()
         return YouTubeLauncher.openSearch(context, query, prefs.appendKaraokeToYouTube)
+    }
+
+    // ---- YouTube in the app -------------------------------------------------
+
+    /** Without a key the in-app route does not exist and must not be offered. */
+    val youTubeSearchConfigured: Boolean get() = YouTubeSearch.configured
+
+    private val _youTubeState = MutableStateFlow<YouTubeState>(YouTubeState.Idle)
+    val youTubeState: kotlinx.coroutines.flow.StateFlow<YouTubeState> = _youTubeState.asStateFlow()
+
+    private val _youTubeQuery = MutableStateFlow("")
+    val youTubeQuery: kotlinx.coroutines.flow.StateFlow<String> = _youTubeQuery.asStateFlow()
+
+    fun searchYouTube(query: String) {
+        val terms = query.trim()
+        if (terms.isBlank()) return
+        _youTubeQuery.value = terms
+        youTubeJob?.cancel()
+        youTubeJob = viewModelScope.launch {
+            _youTubeState.value = YouTubeState.Searching
+            _youTubeState.value = YouTubeSearch
+                .search(terms, prefs.appendKaraokeToYouTube)
+                .fold(
+                    onSuccess = { YouTubeState.Results(it) },
+                    onFailure = { YouTubeState.Failed(it.message ?: "Không tìm được") },
+                )
+        }
+    }
+
+    /** The words actually sent to YouTube, "karaoke" included when asked for. */
+    fun youTubeQueryFor(query: String): String =
+        YouTubeSearch.buildQuery(query, prefs.appendKaraokeToYouTube)
+
+    /**
+     * The room cannot listen to two songs at once, so the drive's player stands
+     * down before the embedded one starts.
+     */
+    fun pauseForYouTube() {
+        player.player.pause()
     }
 
     // ---- updates ------------------------------------------------------------

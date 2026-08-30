@@ -47,6 +47,16 @@ data class PlaybackPosition(
 }
 
 /**
+ * What the room got through between the first song of the night and the queue
+ * running dry. Kept so the end of a session can be an ending rather than a stop.
+ */
+data class SessionSummary(
+    val songsSung: Int,
+    val mostSungTitle: String?,
+    val mostSungCount: Int,
+)
+
+/**
  * Owns the single ExoPlayer instance and the sing-along queue.
  *
  * The queue is deliberately *not* the ExoPlayer playlist: a karaoke room needs to
@@ -86,6 +96,15 @@ class PlayerController(
     private val _current = MutableStateFlow<QueueItem?>(null)
     val current: StateFlow<QueueItem?> = _current.asStateFlow()
 
+    private val _sessionSummary = MutableStateFlow<SessionSummary?>(null)
+    val sessionSummary: StateFlow<SessionSummary?> = _sessionSummary.asStateFlow()
+
+    /** Every song that actually played since the room last went quiet. */
+    private val sungThisSession = mutableListOf<SongEntity>()
+
+    /** Guards against one song being tallied twice on a re-buffer. */
+    private var countedUid: Long? = null
+
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
@@ -117,10 +136,14 @@ class PlayerController(
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) onSongFinished()
                 if (state == Player.STATE_READY) {
-                    val id = _current.value?.song?.id
+                    val item = _current.value
                     val duration = player.duration
-                    if (id != null && duration > 0L) {
-                        scope.launch { repo.rememberDuration(id, duration) }
+                    if (item != null && duration > 0L) {
+                        scope.launch { repo.rememberDuration(item.song.id, duration) }
+                    }
+                    if (item != null && item.uid != countedUid) {
+                        countedUid = item.uid
+                        sungThisSession += item.song
                     }
                 }
             }
@@ -180,6 +203,13 @@ class PlayerController(
             _queue.value = listOf(interrupted) + _queue.value
         }
         startItem(item)
+        // Someone was mid-song and the remote cut them off. Saying their song is
+        // safe turns a hijacking into a hand-over.
+        if (interrupted != null) {
+            _messages.tryEmit(
+                "Hát \"${song.title}\" trước · \"${interrupted.song.title}\" quay lại ngay sau"
+            )
+        }
     }
 
     fun removeAt(uid: Long) {
@@ -218,7 +248,7 @@ class PlayerController(
     fun next() {
         val head = _queue.value.firstOrNull()
         if (head == null) {
-            stopPlayback()
+            endSession()
             return
         }
         _queue.value = _queue.value.drop(1)
@@ -250,12 +280,35 @@ class PlayerController(
     }
 
     private fun startItem(item: QueueItem) {
+        _sessionSummary.value = null
         _current.value = item
         _position.value = PlaybackPosition(0L, item.song.durationMs)
         player.setMediaItem(MediaItem.fromUri(Uri.parse(item.song.uri)))
         player.prepare()
         player.play()
         scope.launch { repo.markPlayed(item.song.id) }
+    }
+
+    /**
+     * The queue running dry is the end of the night, and an ending is the part of
+     * an experience people carry with them. Leave the room with what it got
+     * through rather than cutting to a bare idle screen.
+     */
+    private fun endSession() {
+        if (sungThisSession.isNotEmpty()) {
+            val top = sungThisSession
+                .groupingBy { it.title }
+                .eachCount()
+                .maxByOrNull { it.value }
+            _sessionSummary.value = SessionSummary(
+                songsSung = sungThisSession.size,
+                mostSungTitle = top?.key,
+                mostSungCount = top?.value ?: 0,
+            )
+            sungThisSession.clear()
+        }
+        countedUid = null
+        stopPlayback()
     }
 
     private fun onSongFinished() {

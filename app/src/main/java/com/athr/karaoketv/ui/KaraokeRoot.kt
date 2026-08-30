@@ -127,6 +127,7 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
     val vocalMode by player.vocalMode.collectAsStateWithLifecycle()
     val scaleMode by player.scaleMode.collectAsStateWithLifecycle()
     val audioTracks by player.audioTracks.collectAsStateWithLifecycle()
+    val sessionSummary by player.sessionSummary.collectAsStateWithLifecycle()
 
     val backStack = remember { mutableStateListOf<Screen>(Screen.Home) }
     var browserVisible by remember { mutableStateOf(true) }
@@ -173,6 +174,16 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
         if (toast != null) {
             delay(2500)
             toast = null
+        }
+    }
+
+    // The last song of the night just ended. Whoever is holding the remote is now
+    // facing a stage that answers to nothing, so bring the menu back on its own —
+    // after a pause long enough for the room to read the closing card.
+    LaunchedEffect(sessionSummary) {
+        if (sessionSummary != null && !browserVisible) {
+            delay(4000)
+            browserVisible = true
         }
     }
 
@@ -238,7 +249,11 @@ private fun KaraokeRootContent(vm: KaraokeViewModel, onExit: () -> Unit) {
         if (current != null) {
             VideoStage(player = player.player, scaleMode = scaleMode)
         } else {
-            IdleStage(libraryLabel = vm.libraryLabel, songCount = songCount)
+            IdleStage(
+                libraryLabel = vm.libraryLabel,
+                songCount = songCount,
+                summary = sessionSummary,
+            )
         }
 
         // Invisible key sink for the "just watching the video" state. It only

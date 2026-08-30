@@ -34,6 +34,8 @@ import com.athr.karaoketv.ui.home.HomeScreen
 import com.athr.karaoketv.ui.home.HomeShelves
 import com.athr.karaoketv.ui.components.ScreenNavBar
 import com.athr.karaoketv.ui.queue.QueueScreen
+import com.athr.karaoketv.ui.youtube.YouTubePlayerScreen
+import com.athr.karaoketv.ui.youtube.YouTubeResultsScreen
 import com.athr.karaoketv.ui.search.SearchScreen
 import com.athr.karaoketv.ui.setup.HomeLayoutScreen
 import com.athr.karaoketv.ui.setup.SettingsScreen
@@ -56,7 +58,10 @@ fun BrowserContent(
         Column(Modifier.fillMaxSize()) {
             // Home is the root: nothing to go back to, and it already carries its
             // own button row.
-            if (screen != Screen.Home) {
+            if (screen != Screen.Home &&
+                screen !is Screen.YouTubePlay &&
+                screen !is Screen.YouTubePlaySearch
+            ) {
                 ScreenNavBar(
                     onBack = onBack,
                     onHome = onHome,
@@ -69,7 +74,10 @@ fun BrowserContent(
                 when (screen) {
                     Screen.Home ->
                         HomeRoute(vm, onNavigate, onSongSelected, onSongOptions, onOpenSetup, onWatchVideo)
-                    Screen.Search -> SearchRoute(vm, onSongSelected, onSongOptions)
+                    Screen.Search -> SearchRoute(vm, onNavigate, onSongSelected, onSongOptions)
+                    Screen.YouTube -> YouTubeRoute(vm, onNavigate)
+                    is Screen.YouTubePlay -> YouTubePlayRoute(vm, screen, onBack)
+                    is Screen.YouTubePlaySearch -> YouTubeSearchPlayRoute(vm, screen, onBack)
                     Screen.Categories -> CategoriesRoute(vm, onNavigate)
                     Screen.Artists -> ArtistsRoute(vm, onNavigate)
                     Screen.Queue -> QueueRoute(vm)
@@ -151,13 +159,14 @@ private fun HomeRoute(
 @Composable
 private fun SearchRoute(
     vm: KaraokeViewModel,
+    onNavigate: (Screen) -> Unit,
     onSongSelected: (SongEntity) -> Unit,
     onSongOptions: (SongEntity) -> Unit,
 ) {
     val context = LocalContext.current
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.searchResults.collectAsStateWithLifecycle()
-    val youTubeAvailable = remember { YouTubeLauncher.isAvailable(context) }
+    val youTubeAppAvailable = remember { YouTubeLauncher.isAvailable(context) }
 
     SearchScreen(
         query = query,
@@ -168,8 +177,86 @@ private fun SearchRoute(
         onClear = vm::clearQuery,
         onSongClick = onSongSelected,
         onSongOptions = onSongOptions,
-        youTubeAvailable = youTubeAvailable,
-        onYouTubeSearch = { vm.searchOnYouTube(context, query) },
+        // Always offered: playing in the app needs neither the YouTube app on the
+        // box nor a Data API key.
+        youTubeAvailable = true,
+        onYouTubeSearch = {
+            if (query.isNotBlank()) {
+                vm.pauseForYouTube()
+                if (vm.youTubeSearchConfigured) {
+                    // With a key the room gets to see and pick the results first.
+                    vm.searchYouTube(query)
+                    onNavigate(Screen.YouTube)
+                } else {
+                    // Without one the embedded player runs the search itself.
+                    onNavigate(Screen.YouTubePlaySearch(vm.youTubeQueryFor(query)))
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun YouTubeRoute(vm: KaraokeViewModel, onNavigate: (Screen) -> Unit) {
+    val context = LocalContext.current
+    val state by vm.youTubeState.collectAsStateWithLifecycle()
+    val query by vm.youTubeQuery.collectAsStateWithLifecycle()
+    val youTubeAppAvailable = remember { YouTubeLauncher.isAvailable(context) }
+
+    YouTubeResultsScreen(
+        query = query,
+        state = state,
+        onPlay = { video ->
+            vm.pauseForYouTube()
+            onNavigate(Screen.YouTubePlay(video.id, video.title))
+        },
+        onOpenInYouTubeApp = if (youTubeAppAvailable) {
+            { vm.searchOnYouTube(context, query) }
+        } else {
+            null
+        },
+    )
+}
+
+@Composable
+private fun YouTubeSearchPlayRoute(
+    vm: KaraokeViewModel,
+    screen: Screen.YouTubePlaySearch,
+    onBack: () -> Unit,
+) {
+    val context = LocalContext.current
+    val youTubeAppAvailable = remember { YouTubeLauncher.isAvailable(context) }
+
+    YouTubePlayerScreen(
+        title = screen.query,
+        searchQuery = screen.query,
+        onExit = onBack,
+        onOpenInYouTubeApp = if (youTubeAppAvailable) {
+            { vm.searchOnYouTube(context, screen.query) }
+        } else {
+            null
+        },
+    )
+}
+
+@Composable
+private fun YouTubePlayRoute(
+    vm: KaraokeViewModel,
+    screen: Screen.YouTubePlay,
+    onBack: () -> Unit,
+) {
+    val context = LocalContext.current
+    val youTubeAppAvailable = remember { YouTubeLauncher.isAvailable(context) }
+
+    YouTubePlayerScreen(
+        videoId = screen.videoId,
+        title = screen.title,
+        onExit = onBack,
+        onOpenInYouTubeApp = if (youTubeAppAvailable) {
+            { vm.searchOnYouTube(context, screen.title) }
+        } else {
+            null
+        },
     )
 }
 
@@ -345,7 +432,13 @@ private fun SongListRoute(
                 "Chưa có bài yêu thích nào.\n\n" +
                     "Giữ OK trên một bài rồi chọn \"Thêm vào yêu thích\", hoặc bấm " +
                     "nút hình trái tim ở góc trên khi đang hát bài đó."
-            SongListSource.MostPlayed -> "Chưa hát bài nào."
+            SongListSource.MostPlayed ->
+                "Chưa hát bài nào.\n\n" +
+                    "Hát vài bài đi rồi quay lại — chỗ này tự xếp bài nhà mình hát " +
+                    "nhiều nhất lên đầu."
+            SongListSource.All ->
+                "Thư viện đang trống.\n\n" +
+                    "Vào Cài đặt → Thư viện để chọn ổ cứng và quét."
             else -> "Không có bài nào ở đây."
         },
     )

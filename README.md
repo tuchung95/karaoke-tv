@@ -92,22 +92,66 @@ lịch sử hát.
 
 ## YouTube
 
-Màn hình tìm kiếm có nút **"Tìm bài này trên YouTube"**: gõ tên bài rồi bấm, app
-mở YouTube trên box ngay tại trang kết quả (tự thêm chữ "karaoke" vào từ khoá,
-tắt được trong Cài đặt).
+Hai đường, cố ý để cả hai vì không đường nào thay được đường kia.
 
-**Không quảng cáo đến từ app YouTube, không phải từ app này.** Chỉ cần đăng nhập
-tài khoản Premium trong app YouTube trên box là xong — app karaoke không cần đăng
-nhập gì, và cũng không có chỗ nào để đăng nhập.
+**Phát thẳng trong app, không cần API key.** Màn hình tìm kiếm có nút **YouTube**:
+gõ tên bài rồi bấm, video phát toàn màn hình ngay trong Karaoke TV. Không nhảy sang
+app YouTube, không phải khai báo gì.
 
-Phát cố ý để nguyên trong player của YouTube thay vì kéo về ExoPlayer của app.
-Đó là điều khoản của YouTube yêu cầu, và cũng là cách duy nhất giữ được Premium:
-ad-free do player chính thức thực thi theo tài khoản đang đăng nhập, nên luồng
-phát ở bất kỳ chỗ nào khác đều dính quảng cáo kể cả khi bạn đã trả tiền.
+Làm được vậy vì **IFrame Player API** nhận thẳng một câu tìm kiếm (`listType: 'search'`)
+và tự giữ kết quả như một playlist. Phím giữa = phát/dừng, trái/phải = tua 10 giây,
+**trên/dưới = đổi kết quả** — bản rip đầu tiên hiếm khi là bản muốn hát, nên đây là
+phím dùng nhiều nhất ở màn này. Danh sách phím hiện 6 giây rồi tự ẩn, vì màn hình này
+không vẽ nút điều khiển nào.
 
-Đánh đổi thì có thật: bài mở từ YouTube nằm ngoài bộ phát của app, nên **không
-chỉnh tông, không bỏ giọng ca sĩ, không vào hàng chờ được**. Ba thứ đó chỉ áp
-dụng cho file trên ổ cứng.
+Player là của YouTube, không sửa gì, và tự chạy quảng cáo của họ.
+
+> `listType: 'search'` bị YouTube đánh dấu deprecated từ 11/2020 nhưng vẫn hoạt động.
+> Nếu một ngày họ tắt hẳn, đường có API key bên dưới là phương án thay thế.
+
+**Có API key thì được xem trước.** Thay vì phát ngay bản đầu tiên, app hiện kết quả
+thành lưới thẻ có thumbnail để cả phòng chọn — tìm qua **YouTube Data API v3**, lọc
+sẵn `videoEmbeddable` và `videoSyndicated` để không có thẻ nào là ngõ cụt. Đặt key vào
+`local.properties` cạnh `sdk.dir`:
+
+```properties
+youtubeApiKey=AIza...
+```
+
+Lấy key ở [Google Cloud Console](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
+— tạo project, bật YouTube Data API v3, tạo API key. Quota miễn phí 10.000 đơn vị/ngày,
+mỗi lượt tìm tốn 100, tức khoảng **100 lượt tìm mỗi ngày** — thừa cho một nhà. Key nằm
+ngoài repo và được nhúng vào APK lúc build.
+
+**Đường phát trong app không giữ được Premium.** Ad-free do player chính thức thực thi
+theo tài khoản đang đăng nhập trong app YouTube; WebView của chúng ta là một phiên
+khác, không đăng nhập, nên người trả tiền vẫn dính quảng cáo ở đây.
+
+**Mở trong app YouTube** vì vậy vẫn còn, ở màn hình kết quả và ở cả màn hình báo lỗi.
+Đó là đường duy nhất tôn trọng Premium, và là đường thoát khi embed bị từ chối.
+
+**Cảnh báo về WebView cũ — đọc trước khi tin là nó chạy.** Kiểm trên emulator
+Android TV 14 (WebView 113.0.5672.136, bản 2023): YouTube trả lỗi **152** và từ chối
+phát vì client quá cũ. Nhiều box Android TV giá rẻ cũng kẹt WebView cũ do không có
+CH Play để cập nhật.
+
+Nghĩa là **phát trong app chưa được kiểm chứng trên phần cứng thật**. Kiểm tra box của
+bạn bằng:
+
+```bash
+adb shell dumpsys webviewupdate | grep "Current WebView package"
+```
+
+App không giấu chuyện này: màn hình lỗi nói thẳng nguyên nhân, và đặt nút **Mở trong
+app YouTube** ngay tại chỗ, có focus sẵn, thay vì để cả phòng nhìn màn hình đen.
+
+**Đánh đổi không đổi.** Bài từ YouTube — dù phát trong app hay ngoài app — đều nằm
+ngoài bộ phát của chúng ta, nên **không chỉnh tông, không bỏ giọng ca sĩ, không vào
+hàng chờ được**. Ba thứ đó chỉ áp dụng cho file trên ổ cứng. Màn hình kết quả nói
+điều này một lần, ngay trên lưới, thay vì để người ta phát hiện ra từng cái một.
+
+Chữ "karaoke" được tự thêm vào từ khoá cho cả hai đường, tắt được trong Cài đặt.
+
 
 ## Chọn nguồn nhạc
 
@@ -336,8 +380,10 @@ thường, nên chạy được trên cả box Android TV lẫn box Android ph�
 data/library   Quét ổ cứng (SAF + đường dẫn trực tiếp), bóc tách tên file
 data/db        Room: chỉ mục bài hát, tìm kiếm có xếp hạng
 data/repo      Gộp chỉ mục + nguồn nhạc
+data/youtube   Tìm qua YouTube Data API, mở app YouTube
 player         ExoPlayer, hàng chờ, chỉnh tông, xử lý kênh tiếng
 ui             Compose cho TV: home, tìm kiếm, duyệt, hàng chờ, phát, cài đặt
+ui/youtube     Lưới kết quả YouTube và player IFrame nhúng
 ```
 
 ## Phím tắt trên remote

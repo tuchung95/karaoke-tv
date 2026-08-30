@@ -13,6 +13,15 @@ val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
 }
 
+// The YouTube Data API key rides in local.properties beside sdk.dir: it is per
+// installation, it is quota-limited, and it must never reach version control.
+// Without one the app keeps working — the in-app YouTube search hides itself and
+// the hand-off to the YouTube app stays as it was.
+val localPropsFile = rootProject.file("local.properties")
+val localProps = Properties().apply {
+    if (localPropsFile.exists()) localPropsFile.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.athr.karaoketv"
     compileSdk = 35
@@ -23,6 +32,12 @@ android {
         targetSdk = 35
         versionCode = 19
         versionName = "1.18"
+
+        buildConfigField(
+            "String",
+            "YOUTUBE_API_KEY",
+            "\"${localProps.getProperty("youtubeApiKey", "")}\"",
+        )
     }
 
     signingConfigs {

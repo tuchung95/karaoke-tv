@@ -224,9 +224,12 @@ fun SetupScreen(
 
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Cách chắc chắn nhất: bấm \"Quét video trên máy\" — app đọc thư " +
-                "viện video của hệ thống, thấy được cả video trên USB. Chọn thư mục " +
-                "riêng chỉ dùng được nếu box có sẵn trình chọn thư mục.",
+            text = accessAdvice(
+                pickerAvailable = pickerAvailable,
+                fileAccess = fileAccess,
+                needsAllFiles = needsAllFiles,
+                hasSettingsScreen = allFilesIntent != null,
+            ),
             style = MaterialTheme.typography.bodyLarge,
             color = KaraokeColors.Muted,
         )
@@ -291,23 +294,36 @@ fun SetupScreen(
     }
 }
 
-private fun accessAdviceUnused(
+/**
+ * What to do next on *this* box, rather than one paragraph written for all of them.
+ *
+ * Which routes exist depends on what the manufacturer shipped, so fixed advice is
+ * wrong on most boxes. The all-files route is the one place the viewer is sent out
+ * of the app entirely, and an unannounced jump into an Android settings screen is
+ * where first runs are abandoned — so that case says what they are about to see
+ * and how to get back.
+ */
+private fun accessAdvice(
     pickerAvailable: Boolean,
     fileAccess: Boolean,
     needsAllFiles: Boolean,
     hasSettingsScreen: Boolean,
 ): String = when {
-    fileAccess -> "Chọn một ổ ở dưới để quét."
+    fileAccess -> "Đã có quyền đọc ổ cứng. Chọn một ổ ở dưới để quét."
     !pickerAvailable && needsAllFiles && hasSettingsScreen ->
-        "Máy này không có trình chọn thư mục. Bấm \"Cấp quyền đọc ổ cứng\", bật " +
-            "Karaoke TV trong danh sách, rồi quay lại đây."
+        "Box này không có trình chọn thư mục. Bấm \"Cấp quyền đọc ổ cứng\" — màn hình " +
+            "tiếp theo là của Android chứ không phải của app: tìm dòng \"Karaoke TV\", " +
+            "gạt bật, rồi bấm BACK để quay lại đây."
     !pickerAvailable && !hasSettingsScreen ->
-        "Máy này không có trình chọn thư mục lẫn màn hình cấp quyền. Cần cài thêm " +
-            "một trình quản lý file có hỗ trợ, hoặc cấp quyền qua adb."
+        "Box này không có cả trình chọn thư mục lẫn màn hình cấp quyền. Bấm " +
+            "\"Quét video trên máy\" — đường đó luôn chạy được."
     needsAllFiles ->
-        "Chọn thư mục qua trình chọn của hệ thống, hoặc cấp quyền đọc ổ cứng để quét " +
-            "thẳng — cách này nhanh hơn với thư viện lớn."
-    else -> "Chọn thư mục, hoặc cấp quyền rồi chọn ổ ở dưới."
+        "Chắc ăn nhất là \"Quét video trên máy\": app đọc thư viện video của hệ thống, " +
+            "thấy được cả video trên USB. Chọn thư mục cần box có trình chọn thư mục; " +
+            "cấp quyền đọc ổ cứng thì quét nhanh hơn với thư viện lớn."
+    else ->
+        "Chắc ăn nhất là \"Quét video trên máy\". Hoặc chọn thư mục, hoặc cấp quyền " +
+            "rồi chọn ổ ở dưới."
 }
 
 @Composable
@@ -331,12 +347,23 @@ private fun ScanStatus(state: ScanState) {
                 maxLines = 1,
             )
         }
-        is ScanState.Done -> Text(
-            text = "Xong: ${formatCount(state.totalSongs)} bài trong ${state.elapsedMs / 1000}s" +
-                if (state.removed > 0) " · gỡ ${state.removed} bài không còn trên ổ" else "",
-            style = MaterialTheme.typography.headlineMedium,
-            color = KaraokeColors.Success,
-        )
+        is ScanState.Done -> Column {
+            Text(
+                text = "Xong! ${formatCount(state.totalSongs)} bài sẵn sàng hát",
+                style = MaterialTheme.typography.headlineMedium,
+                color = KaraokeColors.Success,
+            )
+            Text(
+                text = "Quét trong ${(state.elapsedMs / 1000).coerceAtLeast(1)}s" +
+                    if (state.removed > 0) {
+                        " · gỡ ${state.removed} bài không còn trên ổ"
+                    } else {
+                        ""
+                    },
+                style = MaterialTheme.typography.bodyMedium,
+                color = KaraokeColors.Muted,
+            )
+        }
         is ScanState.Failed -> Text(
             text = state.message,
             style = MaterialTheme.typography.titleMedium,
